@@ -1,5 +1,5 @@
 NAME    := libfabric
-VERSION := 1.6.0
+VERSION := 1.7.0rc3
 RELEASE := 1
 DIST    := $(shell rpm --eval %{dist})
 SRPM    := _topdir/SRPMS/$(NAME)-$(VERSION)-$(RELEASE)$(DIST).src.rpm
@@ -7,8 +7,8 @@ RPMS    := _topdir/RPMS/x86_64/$(NAME)-$(VERSION)-$(RELEASE)$(DIST).x86_64.rpm  
 	   _topdir/RPMS/x86_64/$(NAME)-devel-$(VERSION)-$(RELEASE)$(DIST).x86_64.rpm     \
 	   _topdir/RPMS/x86_64/$(NAME)-debuginfo-$(VERSION)-$(RELEASE)$(DIST).x86_64.rpm
 SPEC    := $(NAME).spec
-SRC_EXT := bz2
-SOURCE  := https://github.com/ofiwg/libfabric/releases/download/v$(VERSION)/libfabric-$(VERSION).tar.$(SRC_EXT)
+SRC_EXT := gz
+SOURCE  := https://github.com/ofiwg/$(NAME)/archive/v$(VERSION).tar.$(SRC_EXT)
 TARGETS := $(RPMS) $(SRPM)
 
 all: $(TARGETS)
@@ -17,10 +17,12 @@ all: $(TARGETS)
 	mkdir -p $@
 
 _topdir/SOURCES/%: % | _topdir/SOURCES/
+	rm -f $@
 	ln $< $@
 
 $(NAME)-$(VERSION).tar.$(SRC_EXT):
-	curl -L -O '$(SOURCE)'
+	curl -f -L -O '$(SOURCE)'
+	mv v$(VERSION).tar.$(SRC_EXT) $@
 
 # see https://stackoverflow.com/questions/2973445/ for why we subst
 # the "rpm" for "%" to effectively turn this into a multiple matching
@@ -33,13 +35,17 @@ $(SRPM): $(SPEC) _topdir/SOURCES/$(NAME)-$(VERSION).tar.$(SRC_EXT)
 
 srpm: $(SRPM)
 
+$(RPMS): Makefile
+
 rpms: $(RPMS)
 
 ls: $(TARGETS)
 	ls -ld $^
 
-mockbuild: $(SRPM)
+mockbuild: $(SRPM) Makefile
 	mock $<
 
 rpmlint: $(SPEC)
 	rpmlint $<
+
+.PHONY: srpm rpms ls mockbuild rpmlint FORCE
