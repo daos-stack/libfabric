@@ -3,20 +3,16 @@ pipeline {
 
     stages {
         stage('Lint') {
-            stages {
-                stage('RPM Lint') {
-                    agent {
-                        dockerfile {
-                            filename 'Dockerfile.centos:7'
-                            label 'docker_runner'
-                            additionalBuildArgs  '--build-arg UID=$(id -u)'
-                            args  '--group-add mock --cap-add=SYS_ADMIN --privileged=true'
-                        }
-                    }
-                    steps {
-                        sh 'make rpmlint'
-                    }
+            agent {
+                dockerfile {
+                    filename 'Dockerfile.centos:7'
+                    label 'docker_runner'
+                    additionalBuildArgs  '--build-arg UID=$(id -u)'
+                    args  '--group-add mock --cap-add=SYS_ADMIN --privileged=true'
                 }
+            }
+            steps {
+                sh 'make rpmlint'
             }
         }
         stage('Build') {
