@@ -1,11 +1,11 @@
 Name: libfabric
-Version: 1.7.0rc3
+Version: 1.7.1rc1
 Release: 1%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 Group: System Environment/Libraries
 License: GPLv2 or BSD
 Url: https://www.github.com/ofiwg/libfabric
-Source: https://www.github.com/ofiwg/%{name}/releases/download/v%{version}/%{name}-%{version}.tar.gz
+Source: https://github.com/ofiwg/%{name}/releases/download/v%{version}/%{name}-%{version}.tar.gz
 
 BuildRequires: librdmacm-devel
 BuildRequires: libibverbs-devel >= 1.2.0
@@ -85,6 +85,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Tue Mar 19 2019 Brian J. Murrell <brian.murrell@intel.com> - 1.7.1rc1-1
+- Update to 1.7.1 RC1
+
 * Mon Mar 11 2019 Brian J. Murrell <brian.murrell@intel.com> - 1.7.0rc3-1
 - Rebase to latest release 1.7.0rc3
 

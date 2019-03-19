@@ -1,5 +1,5 @@
 NAME    := libfabric
-VERSION := 1.7.0rc3
+VERSION := 1.7.1rc1
 RELEASE := 1
 DIST    := $(shell rpm --eval %{dist})
 SRPM    := _topdir/SRPMS/$(NAME)-$(VERSION)-$(RELEASE)$(DIST).src.rpm
@@ -8,7 +8,8 @@ RPMS    := _topdir/RPMS/x86_64/$(NAME)-$(VERSION)-$(RELEASE)$(DIST).x86_64.rpm  
 	   _topdir/RPMS/x86_64/$(NAME)-debuginfo-$(VERSION)-$(RELEASE)$(DIST).x86_64.rpm
 SPEC    := $(NAME).spec
 SRC_EXT := gz
-SOURCE  := https://github.com/ofiwg/$(NAME)/archive/v$(VERSION).tar.$(SRC_EXT)
+SOURCE  := https://github.com/ofiwg/$(NAME)/releases/download/v$(VERSION)/$(NAME)-$(VERSION).tar.$(SRC_EXT)
+SOURCES     := _topdir/SOURCES/$(NAME)-$(VERSION).tar.$(SRC_EXT)
 TARGETS := $(RPMS) $(SRPM)
 
 all: $(TARGETS)
@@ -22,15 +23,14 @@ _topdir/SOURCES/%: % | _topdir/SOURCES/
 
 $(NAME)-$(VERSION).tar.$(SRC_EXT):
 	curl -f -L -O '$(SOURCE)'
-	mv v$(VERSION).tar.$(SRC_EXT) $@
 
 # see https://stackoverflow.com/questions/2973445/ for why we subst
 # the "rpm" for "%" to effectively turn this into a multiple matching
 # target pattern rule
-$(subst rpm,%,$(RPMS)): $(SPEC) _topdir/SOURCES/$(NAME)-$(VERSION).tar.$(SRC_EXT)
+$(subst rpm,%,$(RPMS)): $(SPEC) $(SOURCES)
 	rpmbuild -bb --define "%_topdir $$PWD/_topdir" $(SPEC)
 
-$(SRPM): $(SPEC) _topdir/SOURCES/$(NAME)-$(VERSION).tar.$(SRC_EXT)
+$(SRPM): $(SPEC) $(SOURCES)
 	rpmbuild -bs --define "%_topdir $$PWD/_topdir" $(SPEC)
 
 srpm: $(SRPM)
