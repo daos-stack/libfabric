@@ -23,7 +23,6 @@ _topdir/SOURCES/%: % | _topdir/SOURCES/
 
 $(NAME)-$(VERSION).tar.$(SRC_EXT):
 	curl -f -L -O '$(SOURCE)'
-	mv $< $@
 
 # see https://stackoverflow.com/questions/2973445/ for why we subst
 # the "rpm" for "%" to effectively turn this into a multiple matching
