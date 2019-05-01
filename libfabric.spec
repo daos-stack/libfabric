@@ -1,19 +1,18 @@
 Name: libfabric
 Version: 1.7.1rc1
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 Group: System Environment/Libraries
 License: GPLv2 or BSD
 Url: https://www.github.com/ofiwg/libfabric
 Source: https://github.com/ofiwg/%{name}/archive/v%{version}.tar.gz
 
-
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel
 BuildRequires: libibverbs-devel >= 1.2.0
 BuildRequires: libnl3-devel
 %else
-%if 0%{?suse_version} >= 1230
+%if 0%{?suse_version} >= 1315
 BuildRequires: rdma-core-devel
 %endif
 %endif
@@ -21,6 +20,9 @@ BuildRequires: rdma-core-devel
 # infinipath-psm-devel only available for x86_64
 %ifarch x86_64
 BuildRequires: infinipath-psm-devel
+%if 0%{?suse_version} >= 1315
+BuildRequires: libpsm2-devel
+%endif
 %endif
 # valgrind is unavailable for s390
 %ifnarch s390
@@ -30,8 +32,8 @@ BuildRequires: valgrind-devel
 # to be able to generate configure if not present
 BuildRequires: autoconf, automake, libtool
 
-%ifarch x86_64
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static
+%ifarch x86_64 && 0%{?suse_version} == 0
+%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --enable-psm --enable-psm2
 %else
 %global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static
 %endif
@@ -90,6 +92,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Wed May 01 2019 Brian J. Murrell <brian.murrell@intel.com> - 1.7.1rc1-2
+- Disable psm2 on SLES 12.3 as the psm2 library there is too old
+
 * Tue Mar 19 2019 Brian J. Murrell <brian.murrell@intel.com> - 1.7.1rc1-1
 - Update to 1.7.1 RC1
 
