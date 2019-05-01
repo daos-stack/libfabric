@@ -20,7 +20,7 @@ BuildRequires: rdma-core-devel
 # infinipath-psm-devel only available for x86_64
 %ifarch x86_64
 BuildRequires: infinipath-psm-devel
-%if 0%{?suse_version} >= 1315
+%if 0%{?suse_version} > 1315 || 0%{?rhel} >= 7
 BuildRequires: libpsm2-devel
 %endif
 %endif
