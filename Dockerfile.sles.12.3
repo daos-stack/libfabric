@@ -22,7 +22,8 @@ RUN echo "$USER:$PASSWD" | chpasswd
 RUN zypper --non-interactive update
 # basic building
 RUN zypper --non-interactive install make rpm-build curl createrepo git \
-                             lsb-release autoconf automake libtool
+                                     lsb-release autoconf automake libtool
 # libfabric
-RUN zypper --non-interactive librdmacm-devel libibverbs-devel libnl3-devel     \
-                             infinipath-psm-devel libpsm2-devel valgrind-devel
+RUN zypper --non-interactive install librdmacm-devel libibverbs-devel  \
+                                     libnl3-devel infinipath-psm-devel \
+                                     libpsm2-devel valgrind-devel
