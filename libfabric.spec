@@ -31,7 +31,7 @@ BuildRequires: valgrind-devel
 BuildRequires: autoconf, automake, libtool
 
 %ifarch x86_64
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --enable-psm --enable-psm2
+%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static
 %else
 %global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static
 %endif
