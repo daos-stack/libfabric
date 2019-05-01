@@ -1,7 +1,7 @@
 NAME    := libfabric
 VERSION := 1.7.1rc1
 RELEASE := 1
-DIST    := $(shell rpm --eval %{dist})
+DIST    := $(shell rpm --eval %{?dist})
 SRPM    := _topdir/SRPMS/$(NAME)-$(VERSION)-$(RELEASE)$(DIST).src.rpm
 RPMS    := _topdir/RPMS/x86_64/$(NAME)-$(VERSION)-$(RELEASE)$(DIST).x86_64.rpm           \
 	   _topdir/RPMS/x86_64/$(NAME)-devel-$(VERSION)-$(RELEASE)$(DIST).x86_64.rpm     \
@@ -11,6 +11,12 @@ SRC_EXT := gz
 SOURCE  := https://github.com/ofiwg/$(NAME)/releases/download/v$(VERSION)/$(NAME)-$(VERSION).tar.$(SRC_EXT)
 SOURCES     := _topdir/SOURCES/$(NAME)-$(VERSION).tar.$(SRC_EXT)
 TARGETS := $(RPMS) $(SRPM)
+
+# need to use -k because the certificate store is not properly
+# configured on SLES 12.3 containers
+ifeq ($(shell lsb_release -sir),SUSE 12.3)
+  CURL_INSECURE := -k
+endif
 
 all: $(TARGETS)
 
@@ -22,7 +28,7 @@ _topdir/SOURCES/%: % | _topdir/SOURCES/
 	ln $< $@
 
 $(NAME)-$(VERSION).tar.$(SRC_EXT):
-	curl -f -L -O '$(SOURCE)'
+	curl $(CURL_INSECURE) -f -L -O '$(SOURCE)'
 
 # see https://stackoverflow.com/questions/2973445/ for why we subst
 # the "rpm" for "%" to effectively turn this into a multiple matching
