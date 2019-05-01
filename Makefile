@@ -1,6 +1,6 @@
 NAME    := libfabric
 SRC_EXT := gz
-SOURCE  := https://github.com/ofiwg/$(NAME)/archive/v$(VERSION).tar.$(SRC_EXT)
+SOURCE   = https://github.com/ofiwg/$(NAME)/archive/v$(VERSION).tar.$(SRC_EXT)
 
 DIST    := $(shell rpm --eval %{?dist})
 ifeq ($(DIST),)
@@ -13,7 +13,7 @@ RELEASE := $(shell rpm --specfile --qf '%{release}\n' $(NAME).spec | sed -n '$(S
 SRPM    := _topdir/SRPMS/$(NAME)-$(VERSION)-$(RELEASE)$(DIST).src.rpm
 RPMS    := $(addsuffix .rpm,$(addprefix _topdir/RPMS/x86_64/,$(shell rpm --specfile $(NAME).spec)))
 SPEC    := $(NAME).spec
-SOURCES := _topdir/SOURCES/v$(VERSION).tar.$(SRC_EXT)
+SOURCES := $(addprefix _topdir/SOURCES/,$(notdir $(SOURCE)) $(PATCHES))
 TARGETS := $(RPMS) $(SRPM)
 
 # need to use -k because the certificate store is not properly
@@ -30,6 +30,9 @@ all: $(TARGETS)
 _topdir/SOURCES/%: % | _topdir/SOURCES/
 	rm -f $@
 	ln $< $@
+
+$(NAME)-$(VERSION).tar.$(SRC_EXT):
+	curl -f -L -O '$(SOURCE)'
 
 v$(VERSION).tar.$(SRC_EXT):
 	curl $(CURL_INSECURE) -f -L -O '$(SOURCE)'
@@ -67,4 +70,10 @@ show_release:
 show_rpms:
 	@echo $(RPMS)
 
-.PHONY: srpm rpms ls mockbuild rpmlint FORCE show_version show_release show_rpms
+show_source:
+	@echo $(SOURCE)
+
+show_sources:
+	@echo $(SOURCES)
+
+.PHONY: srpm rpms ls mockbuild rpmlint FORCE show_version show_release show_rpms show_source show_sources
