@@ -24,6 +24,6 @@ RUN zypper --non-interactive update
 RUN zypper --non-interactive install make rpm-build curl createrepo git \
                                      lsb-release autoconf automake libtool
 # libfabric
-RUN zypper --non-interactive install librdmacm-devel libibverbs-devel  \
-                                     libnl3-devel infinipath-psm-devel \
-                                     libpsm2-devel valgrind-devel
+RUN zypper --non-interactive install rdma-core-devel libnl3-devel       \
+                                     infinipath-psm-devel libpsm2-devel
+                                     valgrind-devel
