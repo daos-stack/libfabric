@@ -8,9 +8,15 @@ Url: https://www.github.com/ofiwg/libfabric
 Source: https://github.com/ofiwg/%{name}/archive/v%{version}.tar.gz
 
 
+%if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel
 BuildRequires: libibverbs-devel >= 1.2.0
 BuildRequires: libnl3-devel
+%else
+%if 0%{?suse_version} >= 1230
+BuildRequires: rdma-core-devel
+%endif
+%endif
 
 # infinipath-psm-devel only available for x86_64
 %ifarch x86_64
