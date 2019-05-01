@@ -1,4 +1,5 @@
 NAME    := libfabric
+SRC_EXT := gz
 SOURCE  := https://github.com/ofiwg/$(NAME)/archive/v$(VERSION).tar.$(SRC_EXT)
 
 DIST    := $(shell rpm --eval %{?dist})
@@ -12,7 +13,6 @@ RELEASE := $(shell rpm --specfile --qf '%{release}\n' $(NAME).spec | sed -n '$(S
 SRPM    := _topdir/SRPMS/$(NAME)-$(VERSION)-$(RELEASE)$(DIST).src.rpm
 RPMS    := $(addsuffix .rpm,$(addprefix _topdir/RPMS/x86_64/,$(shell rpm --specfile $(NAME).spec)))
 SPEC    := $(NAME).spec
-SRC_EXT := gz
 SOURCES := _topdir/SOURCES/v$(VERSION).tar.$(SRC_EXT)
 TARGETS := $(RPMS) $(SRPM)
 
