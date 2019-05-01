@@ -1,9 +1,14 @@
 NAME    := libfabric
 SOURCE  := https://github.com/ofiwg/$(NAME)/archive/v$(VERSION).tar.$(SRC_EXT)
 
-VERSION := $(shell rpm --specfile --qf '%{version}\n' $(NAME).spec | sed -n '1p')
 DIST    := $(shell rpm --eval %{?dist})
-RELEASE := $(shell rpm --specfile --qf '%{release}\n' $(NAME).spec | sed -n '1s/$(DIST)//p')
+ifeq ($(DIST),)
+SED_EXPR := 1p
+else
+SED_EXPR := 1s/$(DIST)//p
+endif
+VERSION := $(shell rpm --specfile --qf '%{version}\n' $(NAME).spec | sed -n '1p')
+RELEASE := $(shell rpm --specfile --qf '%{release}\n' $(NAME).spec | sed -n '$(SED_EXPR)')
 SRPM    := _topdir/SRPMS/$(NAME)-$(VERSION)-$(RELEASE)$(DIST).src.rpm
 RPMS    := $(addsuffix .rpm,$(addprefix _topdir/RPMS/x86_64/,$(shell rpm --specfile $(NAME).spec)))
 SPEC    := $(NAME).spec
