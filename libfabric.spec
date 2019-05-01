@@ -21,7 +21,6 @@ BuildRequires: rdma-core-devel
 # infinipath-psm-devel only available for x86_64
 %ifarch x86_64
 BuildRequires: infinipath-psm-devel
-BuildRequires: libpsm2-devel
 %endif
 # valgrind is unavailable for s390
 %ifnarch s390
