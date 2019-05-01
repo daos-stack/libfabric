@@ -32,7 +32,7 @@ BuildRequires: valgrind-devel
 # to be able to generate configure if not present
 BuildRequires: autoconf, automake, libtool
 
-%ifarch x86_64 && 0%{?suse_version} == 0
+%ifarch x86_64 && (0%{?suse_version} > 1315 || 0%{?rhel} >= 7)
 %global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --enable-psm --enable-psm2
 %else
 %global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static
