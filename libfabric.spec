@@ -5,7 +5,8 @@ Summary: User-space RDMA Fabric Interfaces
 Group: System Environment/Libraries
 License: GPLv2 or BSD
 Url: https://www.github.com/ofiwg/libfabric
-Source: https://github.com/ofiwg/%{name}/releases/download/v%{version}/%{name}-%{version}.tar.gz
+Source: https://github.com/ofiwg/%{name}/archive/v%{version}.tar.gz
+
 
 BuildRequires: librdmacm-devel
 BuildRequires: libibverbs-devel >= 1.2.0
@@ -46,7 +47,6 @@ Development files for the libfabric library.
 %setup -q
 
 %build
-
 if [ ! -f configure ]; then
     ./autogen.sh
 fi
