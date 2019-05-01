@@ -11,17 +11,18 @@ MAINTAINER Brian J. Murrell <brian.murrell@intel.com>
 # use same UID as host and default value of 1000 if not specified
 ARG UID=1000
 
-# Update distribution
-#Nothing to do for CentOS
-
-# Install basic tools
-RUN zypper --non-interactive update
-RUN zypper --non-interactive install make rpm-build curl createrepo git \
-                             lsb-release
-
 # Add build user (to keep rpmbuild happy)
 ENV USER build
 ENV PASSWD build
 RUN useradd -u $UID -ms /bin/bash $USER
 RUN groupadd -g $UID $USER
 RUN echo "$USER:$PASSWD" | chpasswd
+
+# Install basic tools
+RUN zypper --non-interactive update
+# basic building
+RUN zypper --non-interactive install make rpm-build curl createrepo git \
+                             lsb-release autoconf automake libtool
+# libfabric
+RUN zypper --non-interactive librdmacm-devel libibverbs-devel libnl3-devel     \
+                             infinipath-psm-devel libpsm2-devel valgrind-devel
