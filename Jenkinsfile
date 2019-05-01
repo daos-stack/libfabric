@@ -66,7 +66,9 @@ pipeline {
                     steps {
                         sh '''rm -rf artifacts/sles12.3/
                               mkdir -p artifacts/sles12.3/
+                              rm -rf _topdir/SRPMS
                               if make srpm; then
+                                  rm -rf _topdir/RPMS
                                   if make rpms; then
                                       ln _topdir/{RPMS/*,SRPMS}/*  artifacts/sles12.3/
                                       createrepo artifacts/sles12.3/
