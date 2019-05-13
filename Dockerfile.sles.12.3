@@ -21,8 +21,13 @@ RUN echo "$USER:$PASSWD" | chpasswd
 # Install basic tools
 RUN zypper --non-interactive update
 # basic building
-RUN zypper --non-interactive install make rpm-build curl createrepo git \
-                                     lsb-release autoconf automake libtool
+RUN zypper --non-interactive install make rpm-build curl createrepo git    \
+                                     lsb-release autoconf automake libtool \
+                                     ca-certificates-mozilla
 # libfabric
 RUN zypper --non-interactive install rdma-core-devel libnl3-devel       \
                                      infinipath-psm-devel valgrind-devel
+
+# force an upgrade to get any newly built RPMs
+ARG CACHEBUST=1
+RUN zypper --non-interactive up
