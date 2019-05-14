@@ -25,8 +25,9 @@ RUN zypper --non-interactive install make rpm-build curl createrepo git    \
                                      lsb-release autoconf automake libtool \
                                      ca-certificates-mozilla
 # libfabric
-RUN zypper --non-interactive install rdma-core-devel libnl3-devel       \
-                                     infinipath-psm-devel valgrind-devel
+RUN zypper --non-interactive install rdma-core-devel libnl3-devel        \
+                                     infinipath-psm-devel valgrind-devel \
+                                     libpsm2-devel
 
 # force an upgrade to get any newly built RPMs
 ARG CACHEBUST=1

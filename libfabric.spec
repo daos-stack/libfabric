@@ -20,7 +20,7 @@ BuildRequires: rdma-core-devel
 # infinipath-psm-devel only available for x86_64
 %ifarch x86_64
 BuildRequires: infinipath-psm-devel
-%if 0%{?suse_version} > 1315 || 0%{?rhel} >= 7
+%if 0%{?suse_version} >= 1315 || 0%{?rhel} >= 7
 BuildRequires: libpsm2-devel
 %endif
 %endif
@@ -96,6 +96,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Tue May 14 2019 Brian J. Murrell <brian.murrell@intel.com> - 1.7.1rc1-3
+- Fix SLES 12.3 OS conditionals >= 1315
+
 * Wed May 01 2019 Brian J. Murrell <brian.murrell@intel.com> - 1.7.1rc1-2
 - Disable psm2 on SLES 12.3 as the psm2 library there is too old
 
