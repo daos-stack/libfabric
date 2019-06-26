@@ -1,6 +1,6 @@
 Name: libfabric
 Version: 1.7.1rc1
-Release: 2%{?dist}
+Release: 4%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 Group: System Environment/Libraries
 License: GPLv2 or BSD
@@ -11,6 +11,8 @@ Source: https://github.com/ofiwg/%{name}/archive/v%{version}.tar.gz
 BuildRequires: librdmacm-devel
 BuildRequires: libibverbs-devel >= 1.2.0
 BuildRequires: libnl3-devel
+# needed for psm2_am_register_handlers_2@PSM2_1.0
+BuildRequires: libpsm2-devel >= 10.3.58
 %else
 %if 0%{?suse_version} >= 1315
 BuildRequires: rdma-core-devel
@@ -96,6 +98,10 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Wed Jun 26 2019 Brian J. Murrell <brian.murrell@intel.com> - 1.7.1rc1-4
+- Add BuildRequires: libpsm2-devel >= 10.3.58
+  - needed for psm2_am_register_handlers_2@PSM2_1.0
+
 * Tue May 14 2019 Brian J. Murrell <brian.murrell@intel.com> - 1.7.1rc1-3
 - Fix SLES 12.3 OS conditionals >= 1315
 
