@@ -1,6 +1,6 @@
 Name: libfabric
 Version: 1.7.1rc1
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 Group: System Environment/Libraries
 License: GPLv2 or BSD
