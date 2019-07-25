@@ -1,3 +1,7 @@
+libfabric (1.8.0) unstable; urgency=medium
+  [ Alexander Oganezov ]
+  * New Upstream release
+
 libfabric (1.7.1~rc1-1) unstable; urgency=medium
 
   [ John Malmberg ]
