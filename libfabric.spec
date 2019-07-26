@@ -1,6 +1,6 @@
 Name: libfabric
-Version: 1.7.1rc1
-Release: 4%{?dist}
+Version: 1.8.0
+Release: 1%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 Group: System Environment/Libraries
 License: GPLv2 or BSD
@@ -98,6 +98,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Thu Jul 25 2019 Alexander A. Oganeozv <alexnader.a.oganezov@intel.com> - 1.8.0
+- Update to 1.8.0
+
 * Wed Jun 26 2019 Brian J. Murrell <brian.murrell@intel.com> - 1.7.1rc1-4
 - Add BuildRequires: libpsm2-devel >= 10.3.58
   - needed for psm2_am_register_handlers_2@PSM2_1.0
