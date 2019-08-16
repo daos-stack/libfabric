@@ -51,135 +51,265 @@ pipeline {
             }
         }
         stage('Lint') {
-            stages {
+            parallel {
                 stage('RPM Lint') {
                     agent {
                         dockerfile {
-                            filename 'Dockerfile.centos.7'
+                            filename 'packaging/Dockerfile.centos.7'
                             label 'docker_runner'
+                            args  '--group-add mock' +
+                                  ' --cap-add=SYS_ADMIN' +
+                                  ' --privileged=true'
                             additionalBuildArgs  '--build-arg UID=$(id -u)'
-                            args  '--group-add mock --cap-add=SYS_ADMIN --privileged=true'
                         }
                     }
                     steps {
                         sh 'make rpmlint'
                     }
                 }
-            }
-        }
+                stage('Check Packaging') {
+                    agent { label 'lightweight' }
+                    steps {
+                        checkoutScm url: 'https://github.com/daos-stack/packaging.git',
+                                    checkoutDir: 'packaging-module',
+                                    branch: "corci-725-enhancements"
+                                    //branch: "master"
+                        catchError(stageResult: 'UNSTABLE', buildResult: 'SUCCESS') {
+                            sh 'make PACKAGING_CHECK_DIR=packaging-module packaging_check'
+                        }
+                    }
+                    post {
+                        unsuccessful {
+                            emailext body: 'Packaging out of date for ' + jobName() + '.\n' +
+                                           "You should update it and submit your PR again.",
+                                     recipientProviders: [
+                                          [$class: 'DevelopersRecipientProvider'],
+                                          [$class: 'RequesterRecipientProvider']
+                                     ],
+                                     subject: 'Packaging is out of date for ' + jobName()
+                        }
+                    }
+                } //stage('Check Packaging')
+            } // parallel
+        } //stage('Lint')
         stage('Build') {
             parallel {
                 stage('Build on CentOS 7') {
                     agent {
                         dockerfile {
-                            filename 'Dockerfile.centos.7'
+                            filename 'packaging/Dockerfile.centos.7'
                             label 'docker_runner'
-                            additionalBuildArgs '--build-arg UID=$(id -u) --build-arg JENKINS_URL=' +
+                            args  '--group-add mock' +
+                                  ' --cap-add=SYS_ADMIN' +
+                                  ' --privileged=true'
+                            additionalBuildArgs '--build-arg UID=$(id -u)' +
+                                                ' --build-arg JENKINS_URL=' +
                                                 env.JENKINS_URL
-                            args  '--group-add mock --cap-add=SYS_ADMIN --privileged=true'
                         }
                     }
                     steps {
-                        sh '''rm -rf artifacts/centos7/
+                        sh label: "Build package",
+                           script: '''rm -rf artifacts/centos7/
                               mkdir -p artifacts/centos7/
-                              if make srpm; then
-                                  if make mockbuild; then
-                                      (cd /var/lib/mock/epel-7-x86_64/result/ &&
-                                       cp -r . $OLDPWD/artifacts/centos7/)
-                                      createrepo artifacts/centos7/
-                                  else
-                                      rc=\${PIPESTATUS[0]}
-                                      (cd /var/lib/mock/epel-7-x86_64/result/ &&
-                                       cp -r . $OLDPWD/artifacts/centos7/)
-                                      cp -af _topdir/SRPMS artifacts/centos7/
-                                      exit \$rc
-                                  fi
-                              else
-                                  exit \${PIPESTATUS[0]}
-                              fi'''
+                              make chrootbuild'''
                     }
                     post {
-                        always {
+                        success {
+                             sh label: "Collect artifacts",
+                                script: '''(cd /var/lib/mock/epel-7-x86_64/result/ &&
+                                    cp -r . $OLDPWD/artifacts/centos7/)
+                                   createrepo artifacts/centos7/'''
+                        }
+                        unsuccessful {
+                            sh label: "Collect artifacts",
+                               script: '''mockroot=/var/lib/mock/epel-7-x86_64
+                                  artdir=$PWD/artifacts/centos7
+                                  cp -af _topdir/SRPMS $artdir
+                                  (cd $mockroot/result/ &&
+                                   cp -r . $artdir)
+                                  (if cd $mockroot/root/builddir/build/BUILD/*/; then
+                                       find . -name configure -printf %h\\\\n | \
+                                       while read dir; do
+                                           if [ ! -f $dir/config.log ]; then
+                                               continue
+                                           fi
+                                           tdir="$artdir/autoconf-logs/$dir"
+                                           mkdir -p $tdir
+                                           cp -a $dir/config.log $tdir/
+                                       done
+                                   fi)'''
+                        }
+                        cleanup {
                             archiveArtifacts artifacts: 'artifacts/centos7/**'
                         }
                     }
-                }
+                } //stage('Build on CentOS 7')
                 stage('Build on SLES 12.3') {
-                    when { beforeAgent true
-                           environment name: 'SLES12_3_DOCKER', value: 'true' }
+                    when {
+                        beforeAgent true
+                        environment name: 'SLES12_3_DOCKER', value: 'true'
+                    }
                     agent {
                         dockerfile {
-                            filename 'Dockerfile.sles.12.3'
+                            filename 'packaging/Dockerfile.sles.12.3'
                             label 'docker_runner'
-                            additionalBuildArgs  '--build-arg UID=$(id -u) ' +
-                                                 "--build-arg CACHEBUST=${currentBuild.startTimeInMillis}"
+                            args  '--privileged=true'
+                            additionalBuildArgs '--build-arg UID=$(id -u) ' +
+                                                ' --build-arg JENKINS_URL=' +
+                                                env.JENKINS_URL
                         }
                     }
                     steps {
-                        sh '''rm -rf artifacts/sles12.3/
+                        sh label: "Build package",
+                           script: '''rm -rf artifacts/sles12.3/
                               mkdir -p artifacts/sles12.3/
-                              rm -rf _topdir/SRPMS
-                              if make srpm; then
-                                  rm -rf _topdir/RPMS
-                                  if make rpms; then
-                                      ln _topdir/{RPMS/*,SRPMS}/*  artifacts/sles12.3/
-                                      createrepo artifacts/sles12.3/
-                                  else
-                                      exit \${PIPESTATUS[0]}
-                                  fi
-                              else
-                                  exit \${PIPESTATUS[0]}
-                              fi'''
+                              make chrootbuild'''
                     }
                     post {
-                        always {
+                        success {
+                            sh label: "Collect artifacts",
+                               script: '''mockbase=/var/tmp/build-root/home/abuild
+                                  mockroot=$mockbase/rpmbuild
+                                  artdir=$PWD/artifacts/sles12.3
+                                  (cd $mockroot &&
+                                   cp {RPMS/*,SRPMS}/* $artdir)
+                                  createrepo $artdir/'''
+                        }
+                        unsuccessful {
+                            sh label: "Collect artifacts",
+                               script: '''mockbase=/var/tmp/build-root/home/abuild
+                                  mockroot=$mockbase/rpmbuild
+                                  artdir=$PWD/artifacts/sles12.3
+                                  (if cd $mockroot/BUILD; then
+                                       find . -name configure -printf %h\\\\n | \
+                                       while read dir; do
+                                           if [ ! -f $dir/config.log ]; then
+                                               continue
+                                           fi
+                                           tdir="$artdir/autoconf-logs/$dir"
+                                           mkdir -p $tdir
+                                           cp -a $dir/config.log $tdir/
+                                       done
+                                   fi)'''
+                        }
+                        cleanup {
                             archiveArtifacts artifacts: 'artifacts/sles12.3/**'
                         }
                     }
-                }
+                } //stage('Build on SLES 12.3')
                 stage('Build on Leap 42.3') {
                     agent {
                         dockerfile {
-                            filename 'Dockerfile.leap.42.3'
+                            filename 'packaging/Dockerfile.leap.42.3'
                             label 'docker_runner'
-                            additionalBuildArgs  '--build-arg UID=$(id -u) ' +
-                                                 "--build-arg CACHEBUST=${currentBuild.startTimeInMillis}"
+                            args  '--privileged=true'
+                            additionalBuildArgs '--build-arg UID=$(id -u) ' +
+                                                ' --build-arg JENKINS_URL=' +
+                                                env.JENKINS_URL
                         }
                     }
                     steps {
-                        sh '''rm -rf artifacts/leap42.3/
+                        sh label: "Build package",
+                           script: '''rm -rf artifacts/leap42.3/
                               mkdir -p artifacts/leap42.3/
-                              rm -rf _topdir/SRPMS
-                              if make srpm; then
-                                  rm -rf _topdir/RPMS
-                                  if make rpms; then
-                                      ln _topdir/{RPMS/*,SRPMS}/*  artifacts/leap42.3/
-                                      createrepo artifacts/leap42.3/
-                                  else
-                                      exit \${PIPESTATUS[0]}
-                                  fi
-                              else
-                                  exit \${PIPESTATUS[0]}
-                              fi'''
+                              make chrootbuild'''
                     }
                     post {
-                        always {
+                        success {
+                            sh label: "Collect artifacts",
+                               script: '''mockbase=/var/tmp/build-root/home/abuild
+                                  mockroot=$mockbase/rpmbuild
+                                  artdir=$PWD/artifacts/leap42.3
+                                  (cd $mockroot &&
+                                   cp {RPMS/*,SRPMS}/* $artdir)
+                                  createrepo $artdir/'''
+                        }
+                        unsuccessful {
+                            sh label: "Collect artifacts",
+                               script: '''mockbase=/var/tmp/build-root/home/abuild
+                                  mockroot=$mockbase/rpmbuild
+                                  artdir=$PWD/artifacts/leap42.3
+                                  (if cd $mockroot/BUILD; then
+                                   find . -name configure -printf %h\\\\n | \
+                                   while read dir; do
+                                       if [ ! -f $dir/config.log ]; then
+                                           continue
+                                       fi
+                                       tdir="$artdir/autoconf-logs/$dir"
+                                       mkdir -p $tdir
+                                       cp -a $dir/config.log $tdir/
+                                       done
+                                   fi)'''
+                        }
+                        cleanup {
                             archiveArtifacts artifacts: 'artifacts/leap42.3/**'
                         }
                     }
-                }
-                stage('Build on Ubuntu 18.04') {
+                } //stage('Build on Leap 42.3')
+                stage('Build on Leap 15') {
                     agent {
                         dockerfile {
-                            filename 'Dockerfile.ubuntu.18.04'
+                            filename 'packaging/Dockerfile.leap.15'
                             label 'docker_runner'
-                            additionalBuildArgs '--build-arg UID=$(id -u)' +
-                              ' --build-arg CACHEBUST=' +
-                               currentBuild.startTimeInMillis
+                            args  '--privileged=true'
+                            additionalBuildArgs '--build-arg UID=$(id -u) ' +
+                                                ' --build-arg JENKINS_URL=' +
+                                                env.JENKINS_URL
                         }
                     }
                     steps {
-                        sh '''rm -rf artifacts/ubuntu18.04/
+                        sh label: "Build package",
+                           script: '''rm -rf artifacts/leap15/
+                              mkdir -p artifacts/leap15/
+                              make chrootbuild'''
+                    }
+                    post {
+                        success {
+                            sh label: "Collect artifacts",
+                               script: '''mockbase=/var/tmp/build-root/home/abuild
+                                  mockroot=$mockbase/rpmbuild
+                                  artdir=$PWD/artifacts/leap15
+                                  (cd $mockroot &&
+                                   cp {RPMS/*,SRPMS}/* $artdir)
+                                  createrepo $artdir/'''
+                        }
+                        unsuccessful {
+                            sh label: "Collect artifacts",
+                               script: '''mockbase=/var/tmp/build-root/home/abuild
+                                  mockroot=$mockbase/rpmbuild
+                                  artdir=$PWD/artifacts/leap15
+                                  (if cd $mockroot/BUILD; then
+                                   find . -name configure -printf %h\\\\n | \
+                                   while read dir; do
+                                       if [ ! -f $dir/config.log ]; then
+                                           continue
+                                       fi
+                                       tdir="$artdir/autoconf-logs/$dir"
+                                       mkdir -p $tdir
+                                       cp -a $dir/config.log $tdir/
+                                       done
+                                   fi)'''
+                        }
+                        cleanup {
+                            archiveArtifacts artifacts: 'artifacts/leap15/**'
+                        }
+                    }
+                } //stage('Build on Leap 15')
+                stage('Build on Ubuntu 18.04') {
+                    agent {
+                        dockerfile {
+                            filename 'packaging/Dockerfile.ubuntu.18.04'
+                            label 'docker_runner'
+                            additionalBuildArgs '--build-arg UID=$(id -u) ' +
+                                                ' --build-arg JENKINS_URL=' +
+                                                env.JENKINS_URL +
+                                                ' --build-arg CACHEBUST=' +
+                                                currentBuild.startTimeInMillis
+                        }
+                    }
+                    steps {
+                        sh label: "Build package",
+                           script: '''rm -rf artifacts/ubuntu18.04/
                               mkdir -p artifacts/ubuntu18.04/
                               : "${DEBEMAIL:="$env.DAOS_EMAIL"}"
                               : "${DEBFULLNAME:="$env.DAOS_FULLNAME"}"
@@ -189,30 +319,35 @@ pipeline {
                     }
                     post {
                         success {
-                            sh '''ln -v \
+                            sh label: "Collect artifacts",
+                               script: '''ln -v \
                                    _topdir/BUILD/*{.build,.changes,.deb,.dsc,.gz,.xz} \
                                    artifacts/ubuntu18.04/
                                   pushd artifacts/ubuntu18.04/
                                     dpkg-scanpackages . /dev/null | \
                                       gzip -9c > Packages.gz
                                   popd'''
-                            archiveArtifacts artifacts: 'artifacts/ubuntu18.04/**'
                         }
-                        failure {
-                            sh script: "cat _topdir/BUILD/*.build",
+                        unsuccessful {
+                            sh label: "Collect artifacts",
+                               script: "cat _topdir/BUILD/*.build",
                                returnStatus: true
+                        }
+                        cleanup {
                             archiveArtifacts artifacts: 'artifacts/ubuntu18.04/**'
                         }
                     }
-                }
+                } //stage('Build on Ubuntu 18.04')
                 stage('Build on Ubuntu 18.10') {
                     agent {
                         dockerfile {
-                            filename 'Dockerfile.ubuntu.18.10'
+                            filename 'packaging/Dockerfile.ubuntu.18.10'
                             label 'docker_runner'
-                            additionalBuildArgs '--build-arg UID=$(id -u)' +
-                              ' --build-arg CACHEBUST=' +
-                               currentBuild.startTimeInMillis
+                            additionalBuildArgs '--build-arg UID=$(id -u) ' +
+                                                ' --build-arg JENKINS_URL=' +
+                                                env.JENKINS_URL +
+                                                ' --build-arg CACHEBUST=' +
+                                                currentBuild.startTimeInMillis
                         }
                     }
                     steps {
@@ -227,23 +362,26 @@ pipeline {
                     }
                     post {
                         success {
-                            sh '''ln -v \
+                            sh label: "Collect artifacts",
+                               script: '''ln -v \
                                    _topdir/BUILD/*{.build,.changes,.deb,.dsc,.gz,.xz} \
                                    artifacts/ubuntu18.10/
                                   pushd artifacts/ubuntu18.10/
                                     dpkg-scanpackages . /dev/null | \
                                       gzip -9c > Packages.gz
                                   popd'''
-                            archiveArtifacts artifacts: 'artifacts/ubuntu18.10/**'
                         }
-                        failure {
-                            sh script: "cat _topdir/BUILD/*.build",
+                        unsuccessful {
+                            sh label: "Collect artifacts",
+                               script: "cat _topdir/BUILD/*.build",
                                returnStatus: true
+                        }
+                        cleanup {
                             archiveArtifacts artifacts: 'artifacts/ubuntu18.10/**'
                         }
                     }
-                }
+                } //stage('Build on Ubuntu 18.10')
             }
-        }
-    }
-}
+        } //stage('Build')
+    } // stages
+} // pipeline
