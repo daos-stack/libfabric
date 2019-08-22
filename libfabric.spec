@@ -2,7 +2,7 @@
 
 Name: libfabric
 Version: 1.8.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
 License: GPL-2.0-only OR BSD-2-Clause
@@ -42,10 +42,10 @@ BuildRequires: valgrind-devel
 BuildRequires: autoconf, automake, libtool
 
 %ifarch x86_64
-%if 0%{?suse_version} >= 01315 || 0%{?rhel} >= 7
+%if 0%{?suse_version} > 01315 || 0%{?rhel} >= 7
 %global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --enable-psm --enable-psm2
 %else
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static
+%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-psm --disable-psm2
 %endif
 %else
 %global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static
@@ -135,16 +135,29 @@ rm -f %{buildroot}%{_libdir}/*.la
 %files devel
 %defattr(-,root,root)
 %{_libdir}/libfabric.so
+%if 0%{?suse_version} >= 01315
 %{_libdir}/pkgconfig/%{name}.pc
+%endif
 %{_includedir}/*
 %{_mandir}/man3/*
 %{_mandir}/man7/*
 
 %changelog
+* Thu Aug 22 2019 Brian J. Murrell <brian.murrell@intel.com> - 1.8.0-3
+- Revert previous change as it was causing (on SLES 12.3):
+/usr/lib64/libfabric.so.1: undefined reference to `psm2_epaddr_to_epid@PSM2_1.0'
+/usr/lib64/libfabric.so.1: undefined reference to `psm2_ep_disconnect2@PSM2_1.0'
+/usr/lib64/libfabric.so.1: undefined reference to `psm2_am_register_handlers_2@PSM2_1.0'
+/usr/lib64/libfabric.so.1: undefined reference to `psm2_info_query@PSM2_1.0'
+/usr/lib64/libfabric.so.1: undefined reference to `psm2_get_capability_mask@PSM2_1.0'
+/usr/lib64/libfabric.so.1: undefined reference to `psm2_ep_epid_lookup2@PSM2_1.0'
+- But still install libnl3-devel on all platforms
+- Explicitly disable psm and psm2 on SLES 12.3 due to the above
+
 * Tue Aug 20 2019 Brian J. Murrell <brian.murrell@intel.com> - 1.8.0-2
-- install libnl3-devel on all platforms
-- create a libfabric1 subpackage with the shared library
-- clean up much of SUSE's post build linting errors/warnings
+- Install libnl3-devel on all platforms
+- Create a libfabric1 subpackage with the shared library
+- Clean up much of SUSE's post build linting errors/warnings
 
 * Thu Jul 25 2019 Alexander A. Oganeozv <alexnader.a.oganezov@intel.com> - 1.8.0-1
 - Update to 1.8.0
