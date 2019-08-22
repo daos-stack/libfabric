@@ -18,6 +18,9 @@ BuildRequires: libpsm2-devel >= 10.3.58
 BuildRequires: rdma-core-devel
 %endif
 %endif
+BuildRequires: libibverbs-devel >= 1.2.0
+BuildRequires: libnl3-devel
+BuildRequires: fdupes
 
 # infinipath-psm-devel only available for x86_64
 %ifarch x86_64
@@ -106,6 +109,7 @@ rm -f %{buildroot}%{_libdir}/*.la
 /usr/lib64/libfabric.so.1: undefined reference to `psm2_info_query@PSM2_1.0'
 /usr/lib64/libfabric.so.1: undefined reference to `psm2_get_capability_mask@PSM2_1.0'
 /usr/lib64/libfabric.so.1: undefined reference to `psm2_ep_epid_lookup2@PSM2_1.0'
+- But still install libnl3-devel on all platforms
 
 * Tue Aug 20 2019 Brian J. Murrell <brian.murrell@intel.com> - 1.8.0-2
 - Install libnl3-devel on all platforms
