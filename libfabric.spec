@@ -45,7 +45,7 @@ BuildRequires: autoconf, automake, libtool
 %if 0%{?suse_version} > 01315 || 0%{?rhel} >= 7
 %global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --enable-psm --enable-psm2
 %else
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static
+%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-psm --disable-psm2
 %endif
 %else
 %global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static
@@ -152,6 +152,7 @@ rm -f %{buildroot}%{_libdir}/*.la
 /usr/lib64/libfabric.so.1: undefined reference to `psm2_get_capability_mask@PSM2_1.0'
 /usr/lib64/libfabric.so.1: undefined reference to `psm2_ep_epid_lookup2@PSM2_1.0'
 - But still install libnl3-devel on all platforms
+- Explicitly disable psm and psm2 on SLES 12.3 due to the above
 
 * Tue Aug 20 2019 Brian J. Murrell <brian.murrell@intel.com> - 1.8.0-2
 - Install libnl3-devel on all platforms
