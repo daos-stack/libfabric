@@ -1,18 +1,21 @@
+%define suse_libname libfabric1
+
 Name: libfabric
 Version: 1.8.0
 Release: 3%{?dist}
 Summary: User-space RDMA Fabric Interfaces
+%if 0%{?suse_version} >= 1315
+License: GPL-2.0-only OR BSD-2-Clause
+Group: Development/Libraries/C and C++
+%else
 Group: System Environment/Libraries
 License: GPLv2 or BSD
+%endif
 Url: https://www.github.com/ofiwg/libfabric
 Source: https://github.com/ofiwg/%{name}/archive/v%{version}.tar.gz
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel
-BuildRequires: libibverbs-devel >= 1.2.0
-BuildRequires: libnl3-devel
-# needed for psm2_am_register_handlers_2@PSM2_1.0
-BuildRequires: libpsm2-devel >= 10.3.58
 %else
 %if 0%{?suse_version} >= 1315
 BuildRequires: rdma-core-devel
@@ -24,9 +27,10 @@ BuildRequires: fdupes
 
 # infinipath-psm-devel only available for x86_64
 %ifarch x86_64
+# needed for psm2_am_register_handlers_2@PSM2_1.0
 BuildRequires: infinipath-psm-devel
 %if 0%{?suse_version} >= 1315 || 0%{?rhel} >= 7
-BuildRequires: libpsm2-devel
+BuildRequires: libpsm2-devel >= 10.3.58
 %endif
 %endif
 # valgrind is unavailable for s390
@@ -51,10 +55,25 @@ BuildRequires: autoconf, automake, libtool
 libfabric provides a user-space API to access high-performance fabric
 services, such as RDMA.
 
+%if 0%{?suse_version} >= 01315
+%package -n %{suse_libname}
+Summary: Shared library for libfabric
+Group:  System/Libraries
+
+%description -n %{suse_libname}
+libfabric provides a user-space API to access high-performance fabric
+services, such as RDMA. This package contains the runtime library.
+%endif
+
 %package devel
 Summary: Development files for the libfabric library
+%if 0%{?suse_version} >= 01315
+Group: Development/Libraries/C and C++
+Requires: %{suse_libname}%{?_isa} = %{version}-%{release}
+%else
 Group: System Environment/Libraries
 Requires: %{name}%{?_isa} = %{version}-%{release}
+%endif
 
 %description devel
 Development files for the libfabric library.
@@ -80,22 +99,45 @@ make %{?_smp_mflags} V=1
 %make_install
 # remove unpackaged files from the buildroot
 rm -f %{buildroot}%{_libdir}/*.la
+%fdupes %{buildroot}/%{_prefix}
 
+%if 0%{?suse_version} >= 01315
+%post -n %{suse_libname} -p /sbin/ldconfig
+%postun -n %{suse_libname} -p /sbin/ldconfig
+%else
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
+%endif
 
 %files
+%defattr(-,root,root,-)
+%if 0%{?rhel} >= 7
 %{_libdir}/libfabric.so.*
+%endif
 %{_bindir}/fi_info
 %{_bindir}/fi_pingpong
 %{_bindir}/fi_strerror
+%if 0%{?rhel} >= 7
 %{_libdir}/pkgconfig/%{name}.pc
+%endif
 %{_mandir}/man1/*
+%doc NEWS.md
+%license COPYING
+
+%if 0%{?suse_version} >= 01315
+%files -n %{suse_libname}
+%defattr(-,root,root)
+%{_libdir}/libfabric.so.*
 %license COPYING
 %doc AUTHORS README
+%endif
 
 %files devel
+%defattr(-,root,root)
 %{_libdir}/libfabric.so
+%if 0%{?suse_version} >= 01315
+%{_libdir}/pkgconfig/%{name}.pc
+%endif
 %{_includedir}/*
 %{_mandir}/man3/*
 %{_mandir}/man7/*
