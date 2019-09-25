@@ -1,6 +1,17 @@
+libfabric (1.8.0-4) unstable; urgency=medium
+  [ Brian J. Murrell ]
+  * %setup -> %autosetup
+  * Add patch to bring up to 3712eb0
+  * Set _default_patch_fuzz 1 due to GitHub's dirty compare/ patches
+  * Once again create the libfabric1 subpackage for SLES
+
+ -- Brian J. Murrell <brian.murrell@intel.com>  Mon, 23 Sep 2019 21:19:00 +0000
+
 libfabric (1.8.0-1) unstable; urgency=medium
   [ Alexander Oganezov ]
   * New Upstream release
+
+ -- Alexander Oganezov <alexander.a.oganezov@intel.com>  Fri, 13 Sep 2019 21:43:39 +0000
 
 libfabric (1.7.1~rc1-1) unstable; urgency=medium
 
