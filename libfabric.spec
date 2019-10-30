@@ -2,7 +2,7 @@
 
 Name: libfabric
 Version: 1.8.0
-Release: 4%{?dist}
+Release: 5%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
 License: GPL-2.0-only OR BSD-2-Clause
@@ -30,7 +30,7 @@ BuildRequires: fdupes
 %ifarch x86_64
 BuildRequires: infinipath-psm-devel
 %if 0%{?suse_version} >= 1315 || 0%{?rhel} >= 7
-BuildRequires: libpsm2-devel >= 10.3.58
+BuildRequires: libpsm2-devel >= 11.2.78
 %endif
 %endif
 # valgrind is unavailable for s390
@@ -74,7 +74,7 @@ Requires: %{suse_libname}%{?_isa} = %{version}-%{release}
 Group: System Environment/Libraries
 Requires: %{name}%{?_isa} = %{version}-%{release}
 %endif
-Requires: libpsm2-devel >= 10.3.58
+Requires: libpsm2-devel >= 11.2.78
 
 %description devel
 Development files for the libfabric library.
@@ -144,6 +144,10 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Wed Sep 25 2019 Brian J. Murrell <brian.murrell@intel.com> - 1.8.0-5
+- Update BR: for psm2 to 11.2.78
+- Accordingly, devel subpackage should Requires: psm2-devel
+
 * Mon Sep 23 2019 Brian J. Murrell <brian.murrell@intel.com> - 1.8.0-4
 - %setup -> %autosetup
 - Add patch to bring up to 3712eb0

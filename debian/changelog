@@ -1,3 +1,10 @@
+libfabric (1.8.0-5) unstable; urgency=medium
+  [ Brian J. Murrell ]
+  * Update BR: for psm2 to 11.2.78
+  * Accordingly, devel subpackage should Requires: psm2-devel
+
+ -- Brian J. Murrell <brian.murrell@intel.com>  Wed, 25 Sep 2019 05:52:30 -0400
+
 libfabric (1.8.0-4) unstable; urgency=medium
   [ Brian J. Murrell ]
   * %setup -> %autosetup
