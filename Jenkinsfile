@@ -40,4 +40,4 @@
 // I.e. for testing library changes
 //@Library(value="pipeline-lib@your_branch") _
 
-packageBuildingPipelineDAOS(['daos_test_branch': 'bmurrell-rpm-building-test'])
+packageBuildingPipelineDAOS()
