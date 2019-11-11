@@ -1,7 +1,8 @@
 NAME    := libfabric
 SRC_EXT := gz
 SOURCE   = https://github.com/ofiwg/$(NAME)/archive/v$(VERSION).tar.$(SRC_EXT)
-PATCHES := v1.8.0...3712eb04919fb9542659da326d295734d974013d.patch
+PATCHES := v1.8.0...3712eb04919fb9542659da326d295734d974013d.patch \
+           3712eb04919fb9542659da326d295734d974013d...86340704a7c73e924d2d6e3112d2350ad0f83d84.patch
 
 OSUSE_HPC_REPO := https://download.opensuse.org/repositories/science:/HPC
 LEAP_42_HPC_REPO := $(OSUSE_HPC_REPO)/openSUSE_Leap_42.3/

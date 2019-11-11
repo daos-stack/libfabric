@@ -1,3 +1,9 @@
+libfabric (1.8.0-6) unstable; urgency=medium
+  [ Alexander Oganezov ]
+  * Update to 863407
+
+ -- Alexander Oganezov <alexander.a.oganezov@intel.com>  Sat, 9 Nov 2019 05:52:30 -0400
+
 libfabric (1.8.0-5) unstable; urgency=medium
   [ Brian J. Murrell ]
   * Update BR: for psm2 to 11.2.78
