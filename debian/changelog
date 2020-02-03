@@ -1,3 +1,9 @@
+libfabric (1.8.0-7) unstable; urgency=medium
+  [ Alexander Oganezov ]
+  * Update to 49ee762bc114a186a1ddfd3cf556b053ae084d0c
+
+ -- Alexander Oganezov <alexander.a.oganezov@intel.com>  Mon, 3 Feb 2020 05:52:30 -0400
+
 libfabric (1.8.0-6) unstable; urgency=medium
   [ Alexander Oganezov ]
   * Update to 863407
