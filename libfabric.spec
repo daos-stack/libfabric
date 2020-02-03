@@ -15,7 +15,7 @@ Url: https://www.github.com/ofiwg/libfabric
 Source: https://github.com/ofiwg/%{name}/archive/v%{version}.tar.gz
 Patch0: https://github.com/ofiwg/libfabric/compare/v1.8.0...3712eb04919fb9542659da326d295734d974013d.patch
 Patch1: https://github.com/ofiwg/libfabric/compare/3712eb04919fb9542659da326d295734d974013d...86340704a7c73e924d2d6e3112d2350ad0f83d84.patch
-Patch1: https://github.com/ofiwg/libfabric/compare/86340704a7c73e924d2d6e3112d2350ad0f83d84...49ee762bc114a186a1ddfd3cf556b053ae084d0c.patch
+Patch2: https://github.com/ofiwg/libfabric/compare/86340704a7c73e924d2d6e3112d2350ad0f83d84...49ee762bc114a186a1ddfd3cf556b053ae084d0c.patch
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel >= 1.0.16
