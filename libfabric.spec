@@ -143,7 +143,7 @@ rm -f %{buildroot}%{_libdir}/*.la
 
 %changelog
 * Wed Feb 5 2020 Brian J. Murrell <brian.murrell@intel.com> - 1.9.0-1
-- Update to 49ee762bc114a186a1ddfd3cf556b053ae084d0c
+- Update to 1b8ed7876204692fd95b07df8cba21683707e5dc
 
 * Sat Nov 9 2019 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.8.0-6
 - Update to 863407
