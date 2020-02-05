@@ -1,8 +1,8 @@
 %define suse_libname libfabric1
 
 Name: libfabric
-Version: 1.8.0
-Release: 7%{?dist}
+Version: 1.9.0
+Release: 1%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
 License: GPL-2.0-only OR BSD-2-Clause
@@ -13,9 +13,7 @@ License: GPLv2 or BSD
 %endif
 Url: https://www.github.com/ofiwg/libfabric
 Source: https://github.com/ofiwg/%{name}/archive/v%{version}.tar.gz
-Patch0: https://github.com/ofiwg/libfabric/compare/v1.8.0...3712eb04919fb9542659da326d295734d974013d.patch
-Patch1: https://github.com/ofiwg/libfabric/compare/3712eb04919fb9542659da326d295734d974013d...86340704a7c73e924d2d6e3112d2350ad0f83d84.patch
-Patch2: https://github.com/ofiwg/libfabric/compare/86340704a7c73e924d2d6e3112d2350ad0f83d84...49ee762bc114a186a1ddfd3cf556b053ae084d0c.patch
+Patch0: https://github.com/ofiwg/libfabric/compare/v1.9.0...1b8ed7876204692fd95b07df8cba21683707e5dc.patch
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel >= 1.0.16
@@ -81,8 +79,6 @@ Requires: libpsm2-devel >= 11.2.78
 %description devel
 Development files for the libfabric library.
 
-# GitHub's /compare gives us really dirty patches for some reason
-%global _default_patch_fuzz 1
 %prep
 %autosetup -p1
 
@@ -146,8 +142,8 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
-* Mon Feb 3 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.8.0-7
-- update to 49ee762bc114a186a1ddfd3cf556b053ae084d0c.patch
+* Wed Feb 5 2020 Brian J. Murrell <brian.murrell@intel.com> - 1.9.0-1
+- Update to 49ee762bc114a186a1ddfd3cf556b053ae084d0c
 
 * Sat Nov 9 2019 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.8.0-6
 - Update to 863407
