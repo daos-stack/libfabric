@@ -1,3 +1,9 @@
+libfabric (1.9.0-1) unstable; urgency=medium
+  [ Brian J. Murrell ]
+  * Update to 1b8ed7876204692fd95b07df8cba21683707e5dc
+
+ -- Brian J. Murrell <brian.murrell@intel.com>  Wed, 5 Feb 2020 05:52:30 -0400
+
 libfabric (1.8.0-6) unstable; urgency=medium
   [ Alexander Oganezov ]
   * Update to 863407
