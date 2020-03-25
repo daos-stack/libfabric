@@ -2,7 +2,7 @@
 
 Name: libfabric
 Version: 1.9.0
-Release: 4%{?dist}
+Release: 5%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
 License: GPL-2.0-only OR BSD-2-Clause
@@ -13,7 +13,7 @@ License: GPLv2 or BSD
 %endif
 Url: https://www.github.com/ofiwg/libfabric
 Source: https://github.com/ofiwg/%{name}/archive/v%{version}.tar.gz
-Patch0: https://github.com/ofiwg/libfabric/compare/v1.9.0..15ce5c62e2f87715b32bc546d33bb132b97aea4c.patch
+Patch0: https://github.com/ofiwg/libfabric/compare/v1.9.0..62f6c937601776dac8a1f97c8bb1b1a6acfbc3c0.patch
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel >= 1.0.16
@@ -142,6 +142,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Wed Mar 25 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.9.0-5
+- update to 62f6c937601776dac8a1f97c8bb1b1a6acfbc3c0
+
 * Tue Mar 17 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.9.0-4
 - update to 15ce5c62e2f87715b32bc546d33bb132b97aea4c
 
