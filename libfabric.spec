@@ -1,8 +1,8 @@
 %define suse_libname libfabric1
 
 Name: libfabric
-Version: 1.9.0
-Release: 5%{?dist}
+Version: 1.10.0~a1
+Release: 1%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
 License: GPL-2.0-only OR BSD-2-Clause
@@ -142,6 +142,10 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Sun May 10 2020 Brian J. Murrell <brian.murrell@intel.com> - 1.10.0~a1-1
+- Version is now actually 1.10.0-a1
+- Consolodate patches
+
 * Wed Mar 25 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.9.0-5
 - update to 62f6c937601776dac8a1f97c8bb1b1a6acfbc3c0
 
@@ -152,7 +156,7 @@ rm -f %{buildroot}%{_libdir}/*.la
 - update to 8af3c112bfce155eb04218bef656f58f3609ce19
 
 * Thu Feb 6 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.9.0-2
-- update to 955f3a07dd011fb1dbfa6b6c772ada03d5af320e to pick configure.ac fix
+- Update to 955f3a07dd011fb1dbfa6b6c772ada03d5af320e to pick configure.ac fix
 
 * Wed Feb 5 2020 Brian J. Murrell <brian.murrell@intel.com> - 1.9.0-1
 - Update to 1b8ed7876204692fd95b07df8cba21683707e5dc
