@@ -14,7 +14,7 @@ License: GPLv2 or BSD
 Url: https://www.github.com/ofiwg/libfabric
 Source: https://github.com/ofiwg/%{name}/archive/v%{version}.tar.gz
 Patch0: https://github.com/ofiwg/libfabric/compare/v1.9.0..8fa7c5bbbfee7df5194b65d9294929a893eb4093.patch
-Patch1: https://github.com/daos-stack/libfabric/compare/sockets_provider.patch
+Patch1: sockets_provider.patch
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel >= 1.0.16
