@@ -143,7 +143,7 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
-* Jul 1 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.9.0-7
+* Wed Jul 1 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.9.0-7
 - Commented out infinipath from BuildRequires
 - Removed --enable-psm from configuration flags
 
