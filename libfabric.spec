@@ -2,7 +2,7 @@
 
 Name: libfabric
 Version: 1.9.0
-Release: 6%{?dist}
+Release: 7%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
 License: GPL-2.0-only OR BSD-2-Clause
@@ -29,7 +29,7 @@ BuildRequires: fdupes
 
 # infinipath-psm-devel only available for x86_64
 %ifarch x86_64
-BuildRequires: infinipath-psm-devel
+# BuildRequires: infinipath-psm-devel
 %if 0%{?suse_version} >= 1315 || 0%{?rhel} >= 7
 BuildRequires: libpsm2-devel >= 11.2.78
 %endif
@@ -44,7 +44,7 @@ BuildRequires: autoconf, automake, libtool
 
 %ifarch x86_64
 %if 0%{?suse_version} >= 01315 || 0%{?rhel} >= 7
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --enable-psm --enable-psm2
+%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --enable-psm2
 %else
 %global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static
 %endif
@@ -143,6 +143,10 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Wed Jul 1 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.9.0-7
+- Commented out infinipath from BuildRequires
+- Removed --enable-psm from configuration flags
+
 * Mon May 18 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.9.0-6
 - update to 8fa7c5bbbfee7df5194b65d9294929a893eb4093
 - apply custom patch for sockets provider
