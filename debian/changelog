@@ -1,3 +1,9 @@
+libfabric (1.11.0-1) unstable; urgency=medium
+  [ Alexander Oganezov ]
+  * Update to libfabric v1.11.0
+
+ -- Alexnader Oganezov <alexander.a.oganezov@intel.com>  Mon, 14 Sep 2020 00:00:00 -0400
+
 libfabric (1.9.0-2) unstable; urgency=medium
   [ Alexander Oganezov ]
   * Update to 955f3a07dd011fb1dbfa6b6c772ada03d5af320e
