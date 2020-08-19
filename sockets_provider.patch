@@ -1,5 +1,5 @@
 diff --git a/prov/sockets/src/sock_av.c b/prov/sockets/src/sock_av.c
-index e33e3b8..05d3972 100644
+index e33e3b883..05d3972a1 100644
 --- a/prov/sockets/src/sock_av.c
 +++ b/prov/sockets/src/sock_av.c
 @@ -441,10 +441,12 @@ static int sock_av_remove(struct fid_av *av, fi_addr_t *fi_addr, size_t count,
@@ -16,7 +16,7 @@ index e33e3b8..05d3972 100644
  	return 0;
  }
 diff --git a/prov/sockets/src/sock_conn.c b/prov/sockets/src/sock_conn.c
-index 8c739db..da9489b 100644
+index 8c739db74..be080efe2 100644
 --- a/prov/sockets/src/sock_conn.c
 +++ b/prov/sockets/src/sock_conn.c
 @@ -167,8 +167,9 @@ void sock_conn_release_entry(struct sock_conn_map *map, struct sock_conn *conn)
@@ -31,17 +31,72 @@ index 8c739db..da9489b 100644
  }
  
  static int sock_conn_get_next_index(struct sock_conn_map *map)
-@@ -581,6 +582,8 @@ retry:
+@@ -540,7 +541,11 @@ do_connect:
  
- 	SOCK_LOG_ERROR("Connect error, retrying - %s - %d\n",
- 		       strerror(ofi_sockerr()), conn_fd);
+ 			ret = poll(&poll_fd, 1, sock_conn_timeout);
+ 			if (ret < 0) {
+-				SOCK_LOG_DBG("poll failed\n");
++				SOCK_LOG_ERROR("poll failed: %s\n",
++					       strerror(ofi_sockerr()));
++				goto retry;
++			} else if (ret == 0) {
++				SOCK_LOG_ERROR("poll timed out\n");
+ 				goto retry;
+ 			}
+ 
+@@ -548,21 +553,22 @@ do_connect:
+ 			ret = getsockopt(conn_fd, SOL_SOCKET, SO_ERROR,
+ 					 (void*)(&valopt), &lon);
+ 			if (ret < 0) {
+-				SOCK_LOG_DBG("getsockopt failed: %d, %d\n",
+-					     ret, conn_fd);
++				SOCK_LOG_ERROR("getsockopt failed: %d, %d\n",
++					       ret, conn_fd);
+ 				goto retry;
+ 			}
+ 
+ 			if (valopt) {
+-				SOCK_LOG_DBG("Error in connection() "
+-					     "%d - %s - %d\n",
+-					     valopt, strerror(valopt), conn_fd);
++				SOCK_LOG_ERROR("Error in connection() "
++					       "%d - %s - %d\n",
++					       valopt, strerror(valopt),
++					       conn_fd);
+ 				goto retry;
+ 			}
+ 			goto out;
+ 		} else {
+-			SOCK_LOG_DBG("Timeout or error() - %s: %d\n",
+-				     strerror(ofi_sockerr()), conn_fd);
++			SOCK_LOG_ERROR("Timeout or error() - %s: %d\n",
++				       strerror(ofi_sockerr()), conn_fd);
+ 			goto retry;
+ 		}
+ 	} else {
+@@ -571,6 +577,11 @@ do_connect:
+ 
+ retry:
+ 	do_retry--;
 +	ofi_straddr_log(&sock_prov, FI_LOG_WARN, FI_LOG_EP_CTRL,
-+			"Retry connect to peer ", &addr.sa);
++			"Error connecting to ", &addr.sa);
++	SOCK_LOG_ERROR("Connect error%s - %s - %d\n",
++		       do_retry ? ", retrying" : "", strerror(ofi_sockerr()),
++		       conn_fd);
+ 	if (!do_retry)
+ 		goto err;
+ 
+@@ -579,8 +590,6 @@ retry:
+ 		conn_fd = -1;
+ 	}
+ 
+-	SOCK_LOG_ERROR("Connect error, retrying - %s - %d\n",
+-		       strerror(ofi_sockerr()), conn_fd);
          goto do_connect;
  
  out:
 diff --git a/prov/sockets/src/sock_ep.c b/prov/sockets/src/sock_ep.c
-index 2f1ff9a..18d8dfd 100644
+index 2f1ff9add..18d8dfdd1 100644
 --- a/prov/sockets/src/sock_ep.c
 +++ b/prov/sockets/src/sock_ep.c
 @@ -1786,6 +1786,8 @@ err1:
@@ -129,7 +184,7 @@ index 2f1ff9a..18d8dfd 100644
  	}
  
 diff --git a/prov/sockets/src/sock_progress.c b/prov/sockets/src/sock_progress.c
-index 151ee50..e4a0892 100644
+index 151ee503c..e4a0892f1 100644
 --- a/prov/sockets/src/sock_progress.c
 +++ b/prov/sockets/src/sock_progress.c
 @@ -1942,13 +1942,12 @@ static int sock_pe_progress_tx_entry(struct sock_pe *pe,
