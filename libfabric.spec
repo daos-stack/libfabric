@@ -2,7 +2,7 @@
 
 Name: libfabric
 Version: 1.9.0
-Release: 7%{?dist}
+Release: 8%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
 License: GPL-2.0-only OR BSD-2-Clause
@@ -143,6 +143,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Thu Aug 20 2020 Li Wei <wei.g.li@intel.com> - 1.9.0-8
+- Update sockets_provider.patch to report the original connect errors
+
 * Wed Jul 1 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.9.0-7
 - Commented out infinipath from BuildRequires
 - Removed --enable-psm from configuration flags
