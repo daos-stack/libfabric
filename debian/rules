@@ -11,7 +11,6 @@ configure_providers = \
 	--enable-sockets=yes \
 	--enable-verbs=yes \
 	--enable-usnic=no \
-	--enable-mlx=no \
 	--enable-gni=no \
 	--enable-udp=yes \
 	--enable-rxm=yes \

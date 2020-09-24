@@ -40,5 +40,4 @@
 // I.e. for testing library changes
 //@Library(value="pipeline-lib@your_branch") _
 
-// ubuntu deps need to catch up
-packageBuildingPipelineDAOS(['distros': ['centos7', 'leap15']])
+packageBuildingPipelineDAOS(['distros': ['centos7', 'leap15', 'ubuntu20.04']])
