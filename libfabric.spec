@@ -2,7 +2,7 @@
 
 Name: libfabric
 Version: 1.11.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
 License: GPL-2.0-only OR BSD-2-Clause
@@ -42,9 +42,9 @@ BuildRequires: autoconf, automake, libtool
 
 %ifarch x86_64
 %if 0%{?suse_version} >= 01315 || 0%{?rhel} >= 7
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --enable-psm2
+%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --enable-psm2 --disable-efa
 %else
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static
+%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa
 %endif
 %else
 %global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static
@@ -141,7 +141,10 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
-* Mon Sep 14 2020 Alexnader Oganezov <alexander.a.oganezov@intel.com> - 1.11.0-1
+* Thu Oct 1 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.11.0-2
+- Disable EFA provider
+
+* Mon Sep 14 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.11.0-1
 - Update to libfabric v1.11.0
 
 * Thu Aug 20 2020 Li Wei <wei.g.li@intel.com> - 1.9.0-8
