@@ -1,7 +1,7 @@
 %define suse_libname libfabric1
 
 Name: libfabric
-Version: 1.11.1~rc1
+Version: 1.11.1rc1
 Release: 1%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
@@ -141,7 +141,7 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
-* Fri Oct 9 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.11.1~rc1-1
+* Fri Oct 9 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.11.1rc1-1
 - Update to libfabric v1.11.1rc1
 
 * Thu Oct 1 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.11.0-2
