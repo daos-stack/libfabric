@@ -1,5 +1,5 @@
 %define suse_libname libfabric1
-%global dl_version 1.1.1rc1
+%global dl_version 1.11.1rc1
 
 Name: libfabric
 Version: 1.11.1~rc1
