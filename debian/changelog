@@ -1,4 +1,4 @@
-libfabric (1.11.1rc1-1) unstable; urgency=medium
+libfabric (1.11.1~rc1-1) unstable; urgency=medium
   [ Alexander Oganezov ]
   * Update to libfabric v1.11.1rc1
 

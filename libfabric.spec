@@ -1,7 +1,8 @@
 %define suse_libname libfabric1
+%global dl_version 1.1.1rc1
 
 Name: libfabric
-Version: 1.11.1rc1
+Version: 1.11.1~rc1
 Release: 1%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
@@ -12,7 +13,7 @@ Group: System Environment/Libraries
 License: GPLv2 or BSD
 %endif
 Url: https://www.github.com/ofiwg/libfabric
-Source: https://github.com/ofiwg/%{name}/archive/v%{version}.tar.gz
+Source: https://github.com/ofiwg/%{name}/archive/v%{dl_version}.tar.gz
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel >= 1.0.16
@@ -141,7 +142,7 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
-* Fri Oct 9 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.11.1rc1-1
+* Fri Oct 9 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.11.1~rc1-1
 - Update to libfabric v1.11.1rc1
 
 * Thu Oct 1 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.11.0-2
