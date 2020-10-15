@@ -1,8 +1,9 @@
 %define suse_libname libfabric1
+%global dl_version 1.11.1rc1
 
 Name: libfabric
-Version: 1.11.0
-Release: 2%{?dist}
+Version: 1.11.1~rc1
+Release: 1%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
 License: GPL-2.0-only OR BSD-2-Clause
@@ -12,7 +13,7 @@ Group: System Environment/Libraries
 License: GPLv2 or BSD
 %endif
 Url: https://www.github.com/ofiwg/libfabric
-Source: https://github.com/ofiwg/%{name}/archive/v%{version}.tar.gz
+Source: https://github.com/ofiwg/%{name}/archive/v%{dl_version}.tar.gz
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel >= 1.0.16
@@ -79,7 +80,7 @@ Requires: libpsm2-devel >= 11.2.78
 Development files for the libfabric library.
 
 %prep
-%autosetup -p1
+%autosetup -p1 -n libfabric-%dl_version
 
 %build
 if [ ! -f configure ]; then
@@ -141,6 +142,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Fri Oct 9 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.11.1~rc1-1
+- Update to libfabric v1.11.1rc1
+
 * Thu Oct 1 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.11.0-2
 - Disable EFA provider
 
