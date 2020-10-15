@@ -1,8 +1,8 @@
 %define suse_libname libfabric1
-%global dl_version 1.11.1rc1
+%global dl_version 1.11.0
 
 Name: libfabric
-Version: 1.11.1~rc1
+Version: 1.11.0
 Release: 1%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
