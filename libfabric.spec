@@ -80,7 +80,7 @@ Requires: libpsm2-devel >= 11.2.78
 Development files for the libfabric library.
 
 %prep
-%autosetup -p1 -n libfabric-%dl_version
+%autosetup -p1 -n libfabric-%{dl_version}
 
 %build
 if [ ! -f configure ]; then
