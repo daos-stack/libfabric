@@ -3,7 +3,7 @@
 
 Name: libfabric
 Version: 1.11.1~rc1
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
 License: GPL-2.0-only OR BSD-2-Clause
@@ -80,7 +80,7 @@ Requires: libpsm2-devel >= 11.2.78
 Development files for the libfabric library.
 
 %prep
-%autosetup -p1 -n libfabric-%dl_version
+%autosetup -p1 -n libfabric-%{dl_version}
 
 %build
 if [ ! -f configure ]; then
@@ -142,6 +142,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Thu Oct 15 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.11.1~rc1-2
+- Fix to include DL_VERSION in Makefile
+
 * Fri Oct 9 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.11.1~rc1-1
 - Update to libfabric v1.11.1rc1
 

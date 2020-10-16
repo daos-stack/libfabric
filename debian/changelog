@@ -1,3 +1,9 @@
+libfabric (1.11.1~rc1-2) unstable; urgency=medium
+  [ Alexander Oganezov ]
+  * Fix to Makefile to include proper DL_VERSION
+
+ -- Alexnader Oganezov <alexander.a.oganezov@intel.com>  Thu, 15 Oct 2020 00:00:00 -0400
+
 libfabric (1.11.1~rc1-1) unstable; urgency=medium
   [ Alexander Oganezov ]
   * Update to libfabric v1.11.1rc1
