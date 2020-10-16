@@ -143,7 +143,7 @@ rm -f %{buildroot}%{_libdir}/*.la
 
 %changelog
 * Thu Oct 15 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.11.1~rc1-2
-- Update to libfabric v1.11.1rc1. Retest
+- Fix to include DL_VERSION in Makefile
 
 * Fri Oct 9 2020 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.11.1~rc1-1
 - Update to libfabric v1.11.1rc1
