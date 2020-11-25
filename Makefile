@@ -1,6 +1,6 @@
 NAME    := libfabric
 SRC_EXT := gz
-DL_VERSION := 1.11.1rc1
+#DL_VERSION := 1.11.1rc1
 
 OSUSE_HPC_REPO := https://download.opensuse.org/repositories/science:/HPC
 

@@ -1,3 +1,9 @@
+libfabric (1.11.1-1) unstable; urgency=medium
+  [ Brian J. Murrell ]
+  * Update to 1.11.1
+
+ -- Brian J. Murrell <brian.murrell@intel.com>  Tue, 24 Nov 2020 13:54:52 -0400
+
 libfabric (1.11.1~rc1-2) unstable; urgency=medium
   [ Alexander Oganezov ]
   * Fix to Makefile to include proper DL_VERSION
