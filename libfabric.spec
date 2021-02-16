@@ -4,7 +4,7 @@
 %{?dl_version:%global autosetup_args --p1 -n libfabric-%{dl_version}}
 
 Name: libfabric
-Version: 1.11.1
+Version: 1.12.0~rc1
 Release: 1%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
@@ -144,6 +144,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Tue Feb 16 2021 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.12.0~rc1-1
+- Update to v1.12.0rc1
+
 * Tue Nov 24 2020 Brian J. Murrell <brian.murrell@intel.com> - 1.11.1-1
 - Update to 1.11.1 GA
 - Make the use of %%{dl_verison} more automatic
