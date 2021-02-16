@@ -4,7 +4,7 @@
     rpm.define("dl_version " .. string.gsub(rpm.expand("%{version}"), "~", ""))
 }
 
-#%{?dl_version:%global autosetup_args --p1 -n libfabric-%{dl_version}}
+%{?dl_version:%global autosetup_args --p1 -n libfabric-%{dl_version}}
 
 Name: libfabric
 Version: 1.12.0~rc1
