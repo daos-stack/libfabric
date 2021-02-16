@@ -1,6 +1,6 @@
 %define suse_libname libfabric1
 %global dl_version 1.12.0rc1
-%{?dl_version:%global autosetup_args --p1 -n libfabric-%{dl_version}}
+#%{?dl_version:%global autosetup_args --p1 -n libfabric-%{dl_version}}
 
 Name: libfabric
 Version: 1.12.0~rc1
