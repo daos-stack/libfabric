@@ -1,14 +1,15 @@
 %define suse_libname libfabric1
 #global dl_version 1.11.1rc1
+Name: libfabric
+Version: 1.12.0~rc1
+Release: 1%{?dist}
+
 %{lua:
     rpm.define("dl_version " .. string.gsub(rpm.expand("%{version}"), "~", ""))
 }
 
 %{?dl_version:%global autosetup_args --p1 -n libfabric-%{dl_version}}
 
-Name: libfabric
-Version: 1.12.0~rc1
-Release: 1%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
 License: GPL-2.0-only OR BSD-2-Clause
