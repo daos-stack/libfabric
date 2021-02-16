@@ -1,7 +1,10 @@
 %define suse_libname libfabric1
 #global dl_version 1.11.1rc1
+%{lua:
+    rpm.define("dl_version " .. string.gsub(rpm.expand("%{version}"), "~", ""))
+}
 
-%{?dl_version:%global autosetup_args --p1 -n libfabric-%{dl_version}}
+#%{?dl_version:%global autosetup_args --p1 -n libfabric-%{dl_version}}
 
 Name: libfabric
 Version: 1.12.0~rc1
