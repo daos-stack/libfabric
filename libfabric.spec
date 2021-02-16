@@ -2,7 +2,7 @@
 %global major 1
 %global minor 12
 %global bugrelease 0
-%global rerelease rc1
+%global prerelease rc1
 %global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
 
 Name: libfabric
