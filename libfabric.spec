@@ -1,8 +1,12 @@
 %define suse_libname libfabric1
-%global dl_version 1.12.0rc1
+%global major 1
+%global minor 12
+%global bugrelease 0
+%global rerelease rc1
+%global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
 
 Name: libfabric
-Version: 1.12.0~rc1
+Version: %{major}.%{minor}.%{bugrelease}%{?prerelease:~%{prerelease}}
 Release: 1%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
@@ -13,7 +17,7 @@ Group: System Environment/Libraries
 License: GPLv2 or BSD
 %endif
 Url: https://www.github.com/ofiwg/libfabric
-Source: https://github.com/ofiwg/%{name}/archive/v%{?dl_version}%{!?dl_version:%version}.tar.gz
+Source: https://github.com/ofiwg/%{name}/archive/v%{dl_version}.tar.gz
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel >= 1.0.16
@@ -80,7 +84,7 @@ Requires: libpsm2-devel >= 11.2.78
 Development files for the libfabric library.
 
 %prep
-%autosetup -n libfabric-%dl_version
+%autosetup -p1 -n libfabric-%dl_version
 
 %build
 if [ ! -f configure ]; then
