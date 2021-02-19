@@ -1,10 +1,12 @@
 %define suse_libname libfabric1
-#global dl_version 1.11.1rc1
-
-%{?dl_version:%global autosetup_args --p1 -n libfabric-%{dl_version}}
+%global major 1
+%global minor 12
+%global bugrelease 0
+%global prerelease rc1
+%global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
 
 Name: libfabric
-Version: 1.11.1
+Version: %{major}.%{minor}.%{bugrelease}%{?prerelease:~%{prerelease}}
 Release: 1%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
@@ -15,7 +17,7 @@ Group: System Environment/Libraries
 License: GPLv2 or BSD
 %endif
 Url: https://www.github.com/ofiwg/libfabric
-Source: https://github.com/ofiwg/%{name}/archive/v%{?dl_version}%{!?dl_version:%version}.tar.gz
+Source: https://github.com/ofiwg/%{name}/archive/v%{dl_version}.tar.gz
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel >= 1.0.16
@@ -82,7 +84,7 @@ Requires: libpsm2-devel >= 11.2.78
 Development files for the libfabric library.
 
 %prep
-%autosetup %autosetup_args
+%autosetup -p1 -n libfabric-%dl_version
 
 %build
 if [ ! -f configure ]; then
@@ -144,6 +146,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Tue Feb 16 2021 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.12.0~rc1-1
+- Update to v1.12.0rc1
+
 * Tue Nov 24 2020 Brian J. Murrell <brian.murrell@intel.com> - 1.11.1-1
 - Update to 1.11.1 GA
 - Make the use of %%{dl_verison} more automatic
