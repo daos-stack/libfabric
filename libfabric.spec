@@ -7,7 +7,7 @@
 
 Name: libfabric
 Version: %{major}.%{minor}.%{bugrelease}%{?prerelease:~%{prerelease}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
 License: GPL-2.0-only OR BSD-2-Clause
@@ -47,9 +47,9 @@ BuildRequires: autoconf, automake, libtool
 
 %ifarch x86_64
 %if 0%{?suse_version} >= 01315 || 0%{?rhel} >= 7
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --enable-psm2 --disable-efa
+%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --enable-psm2 --disable-efa --with-gdrcopy=no
 %else
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa
+%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --with-gdrcopy=no
 %endif
 %else
 %global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static
@@ -146,6 +146,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Thu Feb 25 2021 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.12.0~rc1-2
+- Remove linking to gdrapi via --with-gdrcopy=no flag
+
 * Tue Feb 16 2021 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.12.0~rc1-1
 - Update to v1.12.0rc1
 
