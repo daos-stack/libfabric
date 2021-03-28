@@ -16,6 +16,8 @@ configure_providers = \
 	--enable-rxm=yes \
 	--enable-rxd=yes \
 	--enable-bgq=no \
+	--enable-efa=no \
+	--without-gdrcopy \
 	$(NULL)
 
 %:

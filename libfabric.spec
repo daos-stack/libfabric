@@ -2,7 +2,6 @@
 %global major 1
 %global minor 12
 %global bugrelease 0
-%global prerelease rc1
 %global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
 
 Name: libfabric
@@ -47,12 +46,12 @@ BuildRequires: autoconf, automake, libtool
 
 %ifarch x86_64
 %if 0%{?suse_version} >= 01315 || 0%{?rhel} >= 7
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --enable-psm2 --disable-efa
+%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --enable-psm2 --disable-efa --without-gdrcopy
 %else
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa
+%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy
 %endif
 %else
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static
+%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy
 %endif
 
 %description
@@ -146,6 +145,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Wed Mar 10 2021 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.12.0-1
+- Update to v1.12.0
+
 * Tue Feb 16 2021 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.12.0~rc1-1
 - Update to v1.12.0rc1
 
