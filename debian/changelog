@@ -2,7 +2,7 @@ libfabric (1.12.1-1) unstable; urgency=medium
   [ Joseph Moore ]
   * Update to 1.12.1
 
- -- Joseph Moore <joseph.moore@intel.com>  Fri, 18 Jun 2021 14:54:52 -0400
+ -- Joseph Moore <joseph.moore@intel.com>  Fri, 18 Jun 2021 15:54:52 -0400
 
 libfabric (1.12.0-1) unstable; urgency=medium
   [ Alexander Oganezov ]
