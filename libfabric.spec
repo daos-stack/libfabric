@@ -1,7 +1,7 @@
 %define suse_libname libfabric1
 %global major 1
 %global minor 12
-%global bugrelease 0
+%global bugrelease 1
 %global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
 
 Name: libfabric
