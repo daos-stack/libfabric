@@ -6,7 +6,6 @@ include /usr/share/dpkg/pkg-info.mk
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
 configure_providers = \
-configure_providers = \
         --enable-only \
         --enable-psm \
         --enable-psm2 \
