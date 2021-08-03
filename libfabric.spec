@@ -1,6 +1,6 @@
 %define suse_libname libfabric1
 %global major 1
-%global minor 12
+%global minor 13
 %global bugrelease 0
 %global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
 
@@ -17,6 +17,7 @@ License: GPLv2 or BSD
 %endif
 Url: https://www.github.com/ofiwg/libfabric
 Source: https://github.com/ofiwg/%{name}/archive/v%{dl_version}.tar.gz
+Patch0:	https://github.com/daos-stack/libfabric/v1.13.0..7d6d2a13411f8b5e793939493ed6e9f8b1c6a887.patch
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel >= 1.0.16
@@ -145,6 +146,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Tue Aug 3 2021 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.13.0-1
+- Update to v1.13.0 + patch delta of v1.13.0..7d6d2a13411f8b5e793939493ed6e9f8b1c6a887
+
 * Wed Mar 10 2021 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.12.0-1
 - Update to v1.12.0
 
