@@ -1,0 +1,48 @@
+diff --git a/prov/rxm/src/rxm_conn.c b/prov/rxm/src/rxm_conn.c
+index 7250d6f..b91420c 100644
+--- a/prov/rxm/src/rxm_conn.c
++++ b/prov/rxm/src/rxm_conn.c
+@@ -212,22 +212,36 @@ rxm_cmap_check_and_realloc_handles_table(struct rxm_cmap *cmap,
+ {
+ 	void *new_handles;
+ 	size_t grow_size;
++	size_t new_size;
++	void *old_handles;
++
++	pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+ 
+ 	if (OFI_LIKELY(fi_addr < cmap->num_allocated))
+ 		return 0;
+ 
++	/* Temporary workaround for av_table reallocation */
++	pthread_mutex_lock(&mutex);
++
+ 	grow_size = MAX(ofi_av_size(cmap->av), fi_addr - cmap->num_allocated + 1);
+ 
+-	new_handles = realloc(cmap->handles_av,
+-			      (grow_size + cmap->num_allocated) *
+-			      sizeof(*cmap->handles_av));
+-	if (OFI_LIKELY(!new_handles))
++	old_handles = cmap->handles_av;
++	new_size = grow_size + cmap->num_allocated;
++	new_handles = calloc(sizeof(*cmap->handles_av), grow_size + cmap->num_allocated);
++
++	if (OFI_LIKELY(!new_handles)) {
++		pthread_mutex_unlock(&mutex);
+ 		return -FI_ENOMEM;
++	}
++
++	memcpy(new_handles, cmap->handles_av, sizeof(*cmap->handles_av) * cmap->num_allocated);
+ 
+ 	cmap->handles_av = new_handles;
+-	memset(&cmap->handles_av[cmap->num_allocated], 0,
+-	       sizeof(*cmap->handles_av) * grow_size);
+-	cmap->num_allocated += grow_size;
++	cmap->num_allocated = new_size;
++
++	free(old_handles);
++	pthread_mutex_unlock(&mutex);
++
+ 	return 0;
+ }
+ 
