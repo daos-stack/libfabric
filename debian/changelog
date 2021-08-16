@@ -1,3 +1,9 @@
+libfabric (1.12.0-2) unstable; urgency=medium
+  [ Alexander Oganezov ]
+  * Apply avtable patch to rxm on top of v1.12.0
+
+ -- Alexander Oganezov <alexander.a.oganezov@intel.com>  Mon, 16 Aug 2021 13:54:52 -0400
+
 libfabric (1.12.0-1) unstable; urgency=medium
   [ Alexander Oganezov ]
   * Update to 1.12.0
