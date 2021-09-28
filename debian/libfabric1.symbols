@@ -4,6 +4,8 @@ libfabric.so.1 libfabric1 #MINVER#
  FABRIC_1.2@FABRIC_1.2 1.9.0-2
  FABRIC_1.3@FABRIC_1.3 1.9.0-2
  FABRIC_1.4@FABRIC_1.4 1.12.0~rc1-1
+ FABRIC_1.5@FABRIC_1.5 1.12.0-2
+ FABRIC_1.6@FABRIC_1.6 1.12.0-2
  fi_dupinfo@FABRIC_1.0 1.2.0
  fi_dupinfo@FABRIC_1.1 1.5.0
  fi_dupinfo@FABRIC_1.2 1.9.0-2
@@ -22,6 +24,8 @@ libfabric.so.1 libfabric1 #MINVER#
  fi_getparams@FABRIC_1.0 1.2.0
  fi_log@FABRIC_1.0 1.2.0
  fi_log_enabled@FABRIC_1.0 1.2.0
+ fi_log_ready@FABRIC_1.6 1.12.0-2
+ fi_open@FABRIC_1.5 1.12.0-2
  fi_param_define@FABRIC_1.0 1.2.0
  fi_param_get@FABRIC_1.0 1.2.0
  fi_strerror@FABRIC_1.0 1.2.0
