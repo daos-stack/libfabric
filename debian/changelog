@@ -1,6 +1,7 @@
 libfabric (1.12.0-2) unstable; urgency=medium
   [ Alexander Oganezov ]
-  * Update to latest ofi main
+  * Update to latest ofi main e7b4dccbc9d194965b60707d3689c73ab94eb2ae to pick
+    rxm fixes
 
  -- Alexander Oganezov <alexander.a.oganezov@intel.com>  Sep, 27 Mar 2021 13:54:52 -0400
 

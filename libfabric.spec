@@ -17,7 +17,7 @@ License: GPLv2 or BSD
 %endif
 Url: https://www.github.com/ofiwg/libfabric
 Source: https://github.com/ofiwg/%{name}/archive/v%{dl_version}.tar.gz
-Patch0: https://github.com/daos-stack/libfabric/latest_main.patch
+Patch0: https://github.com/daos-stack/libfabric/v1.12.0...e7b4dccbc9d194965b60707d3689c73ab94eb2ae.patch
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel >= 1.0.16
@@ -147,7 +147,7 @@ rm -f %{buildroot}%{_libdir}/*.la
 
 %changelog
 * Mon Sep 27 2021 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.12.0-2
-- Update to main
+- Update to main e7b4dccbc9d194965b60707d3689c73ab94eb2ae to pick rxm fixes
 
 * Wed Mar 10 2021 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.12.0-1
 - Update to v1.12.0

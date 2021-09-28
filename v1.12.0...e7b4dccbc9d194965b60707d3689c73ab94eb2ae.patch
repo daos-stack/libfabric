@@ -56101,7 +56101,7 @@ index 548e264..ca06cfa 100644
  	ofi_endpoint_close(&ep->util_ep);
  	free(ep);
 diff --git a/prov/rxm/src/rxm.h b/prov/rxm/src/rxm.h
-index 8a20882..27f36e2 100644
+index 8a20882..440d451 100644
 --- a/prov/rxm/src/rxm.h
 +++ b/prov/rxm/src/rxm.h
 @@ -64,8 +64,39 @@
@@ -56344,7 +56344,7 @@ index 8a20882..27f36e2 100644
  
  struct rxm_fabric {
  	struct util_fabric util_fabric;
-@@ -287,8 +247,29 @@ struct rxm_domain {
+@@ -287,8 +247,33 @@ struct rxm_domain {
  	fastlock_t amo_bufpool_lock;
  };
  
@@ -56372,10 +56372,14 @@ index 8a20882..27f36e2 100644
  int rxm_av_open(struct fid_domain *domain_fid, struct fi_av_attr *attr,
 -		struct fid_av **av, void *context);
 +		struct fid_av **fid_av, void *context);
++size_t rxm_av_max_peers(struct rxm_av *av);
++void rxm_ref_peer(struct rxm_peer_addr *peer);
++struct rxm_conn *rxm_av_alloc_conn(struct rxm_av *av);
++void rxm_av_free_conn(struct rxm_conn *conn);
  
  struct rxm_mr {
  	struct fid_mr mr_fid;
-@@ -361,14 +342,14 @@ struct rxm_atomic_resp_hdr {
+@@ -361,14 +346,14 @@ struct rxm_atomic_resp_hdr {
  	FUNC(RXM_RNDV_WRITE_DATA_WAIT),	\
  	FUNC(RXM_RNDV_WRITE_DONE_WAIT),	\
  	FUNC(RXM_RNDV_READ),		\
@@ -56393,7 +56397,7 @@ index 8a20882..27f36e2 100644
  	FUNC(RXM_ATOMIC_RESP_WAIT),	\
  	FUNC(RXM_ATOMIC_RESP_SENT)
  
-@@ -438,24 +419,6 @@ struct rxm_iov {
+@@ -438,24 +423,6 @@ struct rxm_iov {
  	uint8_t count;
  };
  
@@ -56418,7 +56422,7 @@ index 8a20882..27f36e2 100644
  struct rxm_buf {
  	/* Must stay at top */
  	struct fi_context fi_context;
-@@ -487,48 +450,27 @@ struct rxm_rx_buf {
+@@ -487,48 +454,27 @@ struct rxm_rx_buf {
  	size_t rndv_rma_index;
  	struct fid_mr *mr[RXM_IOV_LIMIT];
  
@@ -56478,7 +56482,7 @@ index 8a20882..27f36e2 100644
  
  	struct {
  		struct iovec iov[RXM_IOV_LIMIT];
-@@ -536,7 +478,7 @@ struct rxm_tx_rndv_buf {
+@@ -536,7 +482,7 @@ struct rxm_tx_rndv_buf {
  		struct rxm_conn *conn;
  		size_t rndv_rma_index;
  		size_t rndv_rma_count;
@@ -56487,7 +56491,7 @@ index 8a20882..27f36e2 100644
  		struct rxm_rndv_hdr remote_hdr;
  	} write_rndv;
  
-@@ -544,32 +486,9 @@ struct rxm_tx_rndv_buf {
+@@ -544,32 +490,9 @@ struct rxm_tx_rndv_buf {
  	struct rxm_pkt pkt;
  };
  
@@ -56523,7 +56527,7 @@ index 8a20882..27f36e2 100644
  
  enum rxm_deferred_tx_entry_type {
  	RXM_DEFERRED_TX_RNDV_ACK,
-@@ -593,7 +512,7 @@ struct rxm_deferred_tx_entry {
+@@ -593,7 +516,7 @@ struct rxm_deferred_tx_entry {
  			size_t pkt_size;
  		} rndv_ack;
  		struct {
@@ -56532,7 +56536,7 @@ index 8a20882..27f36e2 100644
  		} rndv_done;
  		struct {
  			struct rxm_rx_buf *rx_buf;
-@@ -601,12 +520,12 @@ struct rxm_deferred_tx_entry {
+@@ -601,12 +524,12 @@ struct rxm_deferred_tx_entry {
  			struct rxm_iov rxm_iov;
  		} rndv_read;
  		struct {
@@ -56547,7 +56551,7 @@ index 8a20882..27f36e2 100644
  			struct {
  				struct iovec iov[RXM_IOV_LIMIT];
  				uint8_t count;
-@@ -626,11 +545,11 @@ struct rxm_deferred_tx_entry {
+@@ -626,11 +549,11 @@ struct rxm_deferred_tx_entry {
  			uint64_t device;
  		} sar_seg;
  		struct {
@@ -56561,7 +56565,7 @@ index 8a20882..27f36e2 100644
  		} credit_msg;
  	};
  };
-@@ -657,7 +576,7 @@ struct rxm_recv_entry {
+@@ -657,7 +580,7 @@ struct rxm_recv_entry {
  	/* Used for Rendezvous protocol */
  	struct {
  		/* This is used to send RNDV ACK */
@@ -56570,7 +56574,7 @@ index 8a20882..27f36e2 100644
  	} rndv;
  };
  OFI_DECLARE_FREESTACK(struct rxm_recv_entry, rxm_recv_fs);
-@@ -679,33 +598,12 @@ struct rxm_recv_queue {
+@@ -679,33 +602,12 @@ struct rxm_recv_queue {
  	dlist_func_t		*match_unexp;
  };
  
@@ -56606,7 +56610,7 @@ index 8a20882..27f36e2 100644
  	void (*handle_rx)(struct rxm_rx_buf *rx_buf);
  };
  
-@@ -726,14 +624,19 @@ struct rxm_ep {
+@@ -726,14 +628,19 @@ struct rxm_ep {
  	struct util_ep 		util_ep;
  	struct fi_info 		*rxm_info;
  	struct fi_info 		*msg_info;
@@ -56629,7 +56633,7 @@ index 8a20882..27f36e2 100644
  	int			cq_eq_fairness;
  
  	bool			msg_mr_local;
-@@ -745,12 +648,16 @@ struct rxm_ep {
+@@ -745,12 +652,16 @@ struct rxm_ep {
  	size_t			buffered_min;
  	size_t			buffered_limit;
  	size_t			inject_limit;
@@ -56649,7 +56653,7 @@ index 8a20882..27f36e2 100644
  	struct dlist_entry	rndv_wait_list;
  
  	struct rxm_recv_queue	recv_queue;
-@@ -761,25 +668,10 @@ struct rxm_ep {
+@@ -761,25 +672,10 @@ struct rxm_ep {
  	struct rxm_rndv_ops	*rndv_ops;
  };
  
@@ -56678,7 +56682,7 @@ index 8a20882..27f36e2 100644
  
  extern struct fi_provider rxm_prov;
  extern struct fi_fabric_attr rxm_fabric_attr;
-@@ -804,7 +696,6 @@ ssize_t rxm_handle_rx_buf(struct rxm_rx_buf *rx_buf);
+@@ -804,7 +700,6 @@ ssize_t rxm_handle_rx_buf(struct rxm_rx_buf *rx_buf);
  int rxm_endpoint(struct fid_domain *domain, struct fi_info *info,
  			  struct fid_ep **ep, void *context);
  
@@ -56686,7 +56690,7 @@ index 8a20882..27f36e2 100644
  void rxm_cq_write_error(struct util_cq *cq, struct util_cntr *cntr,
  			void *op_context, int err);
  void rxm_cq_write_error_all(struct rxm_ep *rxm_ep, int err);
-@@ -817,9 +708,9 @@ void rxm_ep_do_progress(struct util_ep *util_ep);
+@@ -817,9 +712,9 @@ void rxm_ep_do_progress(struct util_ep *util_ep);
  void rxm_handle_eager(struct rxm_rx_buf *rx_buf);
  void rxm_handle_coll_eager(struct rxm_rx_buf *rx_buf);
  void rxm_finish_eager_send(struct rxm_ep *rxm_ep,
@@ -56698,7 +56702,7 @@ index 8a20882..27f36e2 100644
  
  int rxm_prepost_recv(struct rxm_ep *rxm_ep, struct fid_ep *rx_ep);
  
-@@ -835,13 +726,13 @@ void rxm_rndv_hdr_init(struct rxm_ep *rxm_ep, void *buf,
+@@ -835,13 +730,13 @@ void rxm_rndv_hdr_init(struct rxm_ep *rxm_ep, void *buf,
  
  static inline size_t rxm_ep_max_atomic_size(struct fi_info *info)
  {
@@ -56715,7 +56719,7 @@ index 8a20882..27f36e2 100644
  {
  	struct iovec iov = {
  		.iov_base = (void *) &resp_buf->pkt,
-@@ -857,17 +748,6 @@ rxm_atomic_send_respmsg(struct rxm_ep *rxm_ep, struct rxm_conn *conn,
+@@ -857,17 +752,6 @@ rxm_atomic_send_respmsg(struct rxm_ep *rxm_ep, struct rxm_conn *conn,
  	return fi_sendmsg(conn->msg_ep, &msg, FI_COMPLETION);
  }
  
@@ -56733,7 +56737,7 @@ index 8a20882..27f36e2 100644
  void rxm_ep_progress_deferred_queue(struct rxm_ep *rxm_ep,
  				    struct rxm_conn *rxm_conn);
  
-@@ -876,29 +756,32 @@ rxm_ep_alloc_deferred_tx_entry(struct rxm_ep *rxm_ep, struct rxm_conn *rxm_conn,
+@@ -876,29 +760,32 @@ rxm_ep_alloc_deferred_tx_entry(struct rxm_ep *rxm_ep, struct rxm_conn *rxm_conn,
  			       enum rxm_deferred_tx_entry_type type);
  
  static inline void
@@ -56783,7 +56787,7 @@ index 8a20882..27f36e2 100644
  }
  
  int rxm_conn_process_eq_events(struct rxm_ep *rxm_ep);
-@@ -959,7 +842,7 @@ rxm_ep_format_tx_buf_pkt(struct rxm_conn *rxm_conn, size_t len, uint8_t op,
+@@ -959,7 +846,7 @@ rxm_ep_format_tx_buf_pkt(struct rxm_conn *rxm_conn, size_t len, uint8_t op,
  			 uint64_t data, uint64_t tag, uint64_t flags,
  			 struct rxm_pkt *pkt)
  {
@@ -56792,7 +56796,7 @@ index 8a20882..27f36e2 100644
  	pkt->hdr.size = len;
  	pkt->hdr.op = op;
  	pkt->hdr.tag = tag;
-@@ -967,27 +850,19 @@ rxm_ep_format_tx_buf_pkt(struct rxm_conn *rxm_conn, size_t len, uint8_t op,
+@@ -967,27 +854,19 @@ rxm_ep_format_tx_buf_pkt(struct rxm_conn *rxm_conn, size_t len, uint8_t op,
  	pkt->hdr.data = data;
  }
  
@@ -56829,7 +56833,7 @@ index 8a20882..27f36e2 100644
  	} else {
  		ofi_buf_free(rx_buf);
  	}
-@@ -1010,7 +885,7 @@ rxm_cq_write_recv_comp(struct rxm_rx_buf *rx_buf, void *context, uint64_t flags,
+@@ -1010,7 +889,7 @@ rxm_cq_write_recv_comp(struct rxm_rx_buf *rx_buf, void *context, uint64_t flags,
  		rxm_cq_write_src(rx_buf->ep->util_ep.rx_cq, context,
  				 flags, len, buf, rx_buf->pkt.hdr.data,
  				 rx_buf->pkt.hdr.tag,
@@ -56994,7 +56998,7 @@ index cb620d4..2078dfa 100644
  };
  
 diff --git a/prov/rxm/src/rxm_av.c b/prov/rxm/src/rxm_av.c
-index b278dcb..33d33fe 100644
+index b278dcb..375b41a 100644
 --- a/prov/rxm/src/rxm_av.c
 +++ b/prov/rxm/src/rxm_av.c
 @@ -1,5 +1,5 @@
@@ -57004,14 +57008,14 @@ index b278dcb..33d33fe 100644
   *
   * This software is available to you under a choice of one of two
   * licenses.  You may choose to be licensed under the terms of the GNU
-@@ -34,142 +34,216 @@
+@@ -34,142 +34,253 @@
  
  #include "rxm.h"
  
 -static int rxm_av_remove(struct fid_av *av_fid, fi_addr_t *fi_addr,
 -			 size_t count, uint64_t flags)
 +
-+static int rxm_addr_compare(struct ofi_rbmap *map, void *key, void *data)
++size_t rxm_av_max_peers(struct rxm_av *av)
  {
 -	struct util_av *av = container_of(av_fid, struct util_av, av_fid);
 -	struct rxm_ep *rxm_ep;
@@ -57031,6 +57035,34 @@ index b278dcb..33d33fe 100644
 -					PRIu64 "\n", *fi_addr + i);
 -		}
 -		ofi_ep_lock_release(&rxm_ep->util_ep);
++	size_t cnt;
++
++	fastlock_acquire(&av->util_av.lock);
++	cnt = av->peer_pool->entry_cnt;
++	fastlock_release(&av->util_av.lock);
++	return cnt;
++}
++
++struct rxm_conn *rxm_av_alloc_conn(struct rxm_av *av)
++{
++	struct rxm_conn *conn;
++	fastlock_acquire(&av->util_av.lock);
++	conn = ofi_buf_alloc(av->conn_pool);
++	fastlock_release(&av->util_av.lock);
++	return conn;
++}
++
++void rxm_av_free_conn(struct rxm_conn *conn)
++{
++	struct rxm_av *av;
++	av = container_of(conn->ep->util_ep.av, struct rxm_av, util_av);
++	fastlock_acquire(&av->util_av.lock);
++	ofi_buf_free(conn);
++	fastlock_release(&av->util_av.lock);
++}
++
++static int rxm_addr_compare(struct ofi_rbmap *map, void *key, void *data)
++{
 +	return memcmp(&((struct rxm_peer_addr *) data)->addr, key,
 +		container_of(map, struct rxm_av, addr_map)->util_av.addrlen);
 +}
@@ -57040,6 +57072,7 @@ index b278dcb..33d33fe 100644
 +{
 +	struct rxm_peer_addr *peer;
 +
++	assert(fastlock_held(&av->util_av.lock));
 +	peer = ofi_ibuf_alloc(av->peer_pool);
 +	if (!peer)
 +		return NULL;
@@ -57062,6 +57095,7 @@ index b278dcb..33d33fe 100644
 +
 +static void rxm_free_peer(struct rxm_peer_addr *peer)
 +{
++	assert(fastlock_held(&peer->av->util_av.lock));
 +	assert(!peer->refcnt);
 +	ofi_rbmap_delete(&peer->av->addr_map, peer->node);
 +	ofi_ibuf_free(peer);
@@ -57095,6 +57129,13 @@ index b278dcb..33d33fe 100644
 +	if (--peer->refcnt == 0)
 +		rxm_free_peer(peer);
 +	fastlock_release(&av->util_av.lock);
++}
++
++void rxm_ref_peer(struct rxm_peer_addr *peer)
++{
++	fastlock_acquire(&peer->av->util_av.lock);
++	peer->refcnt++;
++	fastlock_release(&peer->av->util_av.lock);
 +}
 +
 +static void
@@ -57146,6 +57187,15 @@ index b278dcb..33d33fe 100644
 +		peer = rxm_get_peer(av, cur_addr);
 +		if (!peer)
 +			goto err;
++
++		peer->fi_addr = fi_addr ? fi_addr[i] :
++				ofi_av_lookup_fi_addr(&av->util_av, cur_addr);
++
++		/* lookup can fail if prior AV insertion failed */
++		if (peer->fi_addr != FI_ADDR_NOTAVAIL)
++			rxm_set_av_context(av, peer->fi_addr, peer);
++	}
++	return 0;
  
 -	fastlock_acquire(&av->ep_list_lock);
 -	dlist_foreach_container(&av->ep_list, struct rxm_ep,
@@ -57168,15 +57218,6 @@ index b278dcb..33d33fe 100644
 -					PRIu64 "\n", fi_addr_tmp);
 -				break;
 -			}
-+		peer->fi_addr = fi_addr ? fi_addr[i] :
-+				ofi_av_lookup_fi_addr(&av->util_av, cur_addr);
-+
-+		/* lookup can fail if prior AV insertion failed */
-+		if (peer->fi_addr != FI_ADDR_NOTAVAIL)
-+			rxm_set_av_context(av, peer->fi_addr, peer);
-+	}
-+	return 0;
-+
 +err:
 +	while (i--) {
 +		if (fi_addr) {
@@ -57313,7 +57354,7 @@ index b278dcb..33d33fe 100644
  }
  
  int rxm_av_insertsvc(struct fid_av *av, const char *node, const char *service,
-@@ -190,6 +264,30 @@ int rxm_av_lookup(struct fid_av *av_fid, fi_addr_t fi_addr,
+@@ -190,6 +301,30 @@ int rxm_av_lookup(struct fid_av *av_fid, fi_addr_t fi_addr,
  	return ofi_ip_av_lookup(av_fid, fi_addr, addr, addrlen);
  }
  
@@ -57344,7 +57385,7 @@ index b278dcb..33d33fe 100644
  
  static struct fi_ops_av rxm_av_ops = {
  	.size = sizeof(struct fi_ops_av),
-@@ -203,15 +301,54 @@ static struct fi_ops_av rxm_av_ops = {
+@@ -203,15 +338,54 @@ static struct fi_ops_av rxm_av_ops = {
  };
  
  int rxm_av_open(struct fid_domain *domain_fid, struct fi_av_attr *attr,
@@ -57376,15 +57417,15 @@ index b278dcb..33d33fe 100644
 +	ofi_rbmap_init(&av->addr_map, rxm_addr_compare);
 +	domain = container_of(domain_fid, struct rxm_domain,
 +			      util_domain.domain_fid);
-+
+ 
+-	(*av)->ops = &rxm_av_ops;
 +	util_attr.context_len = sizeof(struct rxm_peer_addr *);
 +	util_attr.flags = 0;
 +	util_attr.addrlen = ofi_sizeof_addr_format(domain->util_domain.
 +						   addr_format);
 +	if (attr->type == FI_AV_UNSPEC)
 +		attr->type = FI_AV_TABLE;
- 
--	(*av)->ops = &rxm_av_ops;
++
 +	ret = ofi_av_init(&domain->util_domain, attr, &util_attr,
 +			  &av->util_av, context);
 +	if (ret)
@@ -57405,7 +57446,7 @@ index b278dcb..33d33fe 100644
 +	return ret;
 +}
 diff --git a/prov/rxm/src/rxm_conn.c b/prov/rxm/src/rxm_conn.c
-index 7250d6f..93c8221 100644
+index 7250d6f..d9cae06 100644
 --- a/prov/rxm/src/rxm_conn.c
 +++ b/prov/rxm/src/rxm_conn.c
 @@ -1,5 +1,5 @@
@@ -57415,7 +57456,7 @@ index 7250d6f..93c8221 100644
   * Copyright (c) 2019 Amazon.com, Inc. or its affiliates. All rights reserved.
   *
   * This software is available to you under a choice of one of two
-@@ -39,1326 +39,717 @@
+@@ -39,1326 +39,720 @@
  #include <ofi_util.h>
  #include "rxm.h"
  
@@ -58447,8 +58488,8 @@ index 7250d6f..93c8221 100644
 -err:
 -	fi_close(&msg_ep->fid);
 -	return ret;
-+	conn->peer->refcnt--;
-+	ofi_buf_free(conn);
++	rxm_put_peer(conn->peer);
++	rxm_av_free_conn(conn);
  }
  
 -static int rxm_conn_reprocess_directed_recvs(struct rxm_recv_queue *recv_queue)
@@ -58470,7 +58511,7 @@ index 7250d6f..93c8221 100644
 +	struct rxm_conn *conn;
 +	struct dlist_entry *tmp;
 +	struct rxm_av *av;
-+	int i;
++	int i, cnt;
  
 -		rx_buf->unexp_msg.addr = rx_buf->conn->handle.fi_addr;
 -		match_attr.addr = rx_buf->unexp_msg.addr;
@@ -58482,8 +58523,11 @@ index 7250d6f..93c8221 100644
 -						 recv_queue->match_recv,
 -						 &match_attr);
 -		if (!entry)
-+	/* We can't have more connections than known peers */
-+	for (i = 0; i < av->peer_pool->entry_cnt; i++) {
++	/* We can't have more connections than the current number of
++	 * possible peers.
++	 */
++	cnt = (int) rxm_av_max_peers(av);
++	for (i = 0; i < cnt; i++) {
 +		conn = ofi_idm_lookup(&ep->conn_idx_map, i);
 +		if (!conn)
  			continue;
@@ -58538,7 +58582,7 @@ index 7250d6f..93c8221 100644
 +
 +	assert(ofi_ep_lock_held(&ep->util_ep));
 +	av = container_of(ep->util_ep.av, struct rxm_av, util_av);
-+	conn = ofi_buf_alloc(av->conn_pool);
++	conn = rxm_av_alloc_conn(av);
 +	if (!conn)
 +		return NULL;
  
@@ -58559,7 +58603,7 @@ index 7250d6f..93c8221 100644
 -		       "Reprocessed directed recvs - %d\n", count);
 -	}
 +	conn->peer = peer;
-+	peer->refcnt++;
++	rxm_ref_peer(peer);
 +
 +	FI_DBG(&rxm_prov, FI_LOG_EP_CTRL, "allocated conn %p\n", conn);
 +	return conn;
@@ -59266,7 +59310,7 @@ index 7250d6f..93c8221 100644
  	}
  	ofi_ep_lock_release(&ep->util_ep);
  
-@@ -1366,27 +757,9 @@ static void *rxm_conn_progress(void *arg)
+@@ -1366,27 +760,9 @@ static void *rxm_conn_progress(void *arg)
  	return NULL;
  }
  
@@ -59295,7 +59339,7 @@ index 7250d6f..93c8221 100644
  	struct rxm_fabric *fabric;
  	struct fid *fids[2] = {
  		&ep->msg_eq->fid,
-@@ -1398,13 +771,8 @@ static void *rxm_conn_atomic_progress(void *arg)
+@@ -1398,13 +774,8 @@ static void *rxm_conn_atomic_progress(void *arg)
  	};
  	int ret;
  
@@ -59309,7 +59353,7 @@ index 7250d6f..93c8221 100644
  	ret = fi_control(&ep->msg_eq->fid, FI_GETWAIT, &fds[0].fd);
  	if (ret) {
  		FI_WARN(&rxm_prov, FI_LOG_EP_CTRL,
-@@ -1426,163 +794,72 @@ static void *rxm_conn_atomic_progress(void *arg)
+@@ -1426,163 +797,72 @@ static void *rxm_conn_atomic_progress(void *arg)
  		ret = fi_trywait(fabric->msg_fabric, fids, 2);
  
  		if (!ret) {
@@ -69405,6 +69449,28 @@ index 9310639..adef026 100644
  void vrb_cleanup_cq(struct vrb_ep *cur_ep);
  int vrb_find_max_inline(struct ibv_pd *pd, struct ibv_context *context,
  			   enum ibv_qp_type qp_type);
+diff --git a/prov/verbs/src/verbs_cm.c b/prov/verbs/src/verbs_cm.c
+index 534f5e0..de02a43 100644
+--- a/prov/verbs/src/verbs_cm.c
++++ b/prov/verbs/src/verbs_cm.c
+@@ -306,12 +306,15 @@ vrb_msg_ep_reject(struct fid_pep *pep, fid_t handle,
+ 	vrb_msg_ep_prepare_cm_data(param, paramlen, cm_hdr);
+ 
+ 	fastlock_acquire(&_pep->eq->lock);
+-	if (connreq->is_xrc)
++	if (connreq->is_xrc) {
+ 		ret = vrb_msg_xrc_ep_reject(connreq, cm_hdr,
+ 				(uint8_t)(sizeof(*cm_hdr) + paramlen));
+-	else
++	} else if (connreq->id) {
+ 		ret = rdma_reject(connreq->id, cm_hdr,
+ 			(uint8_t)(sizeof(*cm_hdr) + paramlen)) ? -errno : 0;
++	} else {
++		ret = -FI_EBUSY;
++	}
+ 	fastlock_release(&_pep->eq->lock);
+ 
+ 	free(connreq);
 diff --git a/prov/verbs/src/verbs_cm_xrc.c b/prov/verbs/src/verbs_cm_xrc.c
 index d831307..083cb27 100644
 --- a/prov/verbs/src/verbs_cm_xrc.c
@@ -69731,7 +69797,7 @@ index 553dde1..4a43dab 100644
  
  rbmap_err:
 diff --git a/prov/verbs/src/verbs_ep.c b/prov/verbs/src/verbs_ep.c
-index 2898d76..65b5551 100644
+index 2898d76..4bd2e6a 100644
 --- a/prov/verbs/src/verbs_ep.c
 +++ b/prov/verbs/src/verbs_ep.c
 @@ -432,12 +432,12 @@ static int vrb_close_free_ep(struct vrb_ep *ep)
@@ -69811,7 +69877,20 @@ index 2898d76..65b5551 100644
  				assert(connreq->is_xrc);
  
  				if (!connreq->xrc.is_reciprocal) {
-@@ -1626,12 +1626,12 @@ static void vrb_cleanup_prepost_bufs(struct vrb_srq_ep *srq_ep)
+@@ -1159,7 +1159,12 @@ int vrb_open_ep(struct fid_domain *domain, struct fi_info *info,
+ 						goto err1;
+ 				}
+ 			} else {
++				/* ep now owns this rdma cm id, prevent trying to access
++				 * it outside of ep operations to avoid possible use-after-
++				 * free bugs in case the ep is closed
++				 */
+ 				ep->id = connreq->id;
++				connreq->id = NULL;
+ 				ep->ibv_qp = ep->id->qp;
+ 				ep->id->context = &ep->util_ep.ep_fid.fid;
+ 			}
+@@ -1626,12 +1631,12 @@ static void vrb_cleanup_prepost_bufs(struct vrb_srq_ep *srq_ep)
  	}
  }
  
@@ -69826,7 +69905,7 @@ index 2898d76..65b5551 100644
  	if (!srq_ep->xrc.cq || !srq_ep->srq)
  		return FI_SUCCESS;
  
-@@ -1656,7 +1656,7 @@ static int vrb_srq_close(fid_t fid)
+@@ -1656,7 +1661,7 @@ static int vrb_srq_close(fid_t fid)
  	struct vrb_cq *cq = srq_ep->xrc.cq;
  	int ret;
  
@@ -69835,7 +69914,7 @@ index 2898d76..65b5551 100644
  		if (cq) {
  			fastlock_acquire(&cq->xrc.srq_list_lock);
  			ret = vrb_xrc_close_srq(srq_ep);
-@@ -1724,7 +1724,7 @@ int vrb_srq_context(struct fid_domain *domain, struct fi_rx_attr *attr,
+@@ -1724,7 +1729,7 @@ int vrb_srq_context(struct fid_domain *domain, struct fi_rx_attr *attr,
  
  	/* XRC SRQ creation is delayed until the first endpoint it is bound
  	 * to is enabled.*/
