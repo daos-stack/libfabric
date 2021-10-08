@@ -147,7 +147,7 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
-* Fri Oct 10 2021 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.13.2~rc1-1
+* Fri Oct 8 2021 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.13.2~rc1-1
 - Update to v1.13.2rc1
 
 * Wed Mar 10 2021 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.12.0-1
