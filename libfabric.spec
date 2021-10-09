@@ -1,7 +1,9 @@
 %define suse_libname libfabric1
 %global major 1
-%global minor 12
-%global bugrelease 0
+%global minor 13
+%global bugrelease 2
+%global prerelease rc1
+
 %global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
 
 Name: libfabric
@@ -145,6 +147,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Fri Oct 8 2021 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.13.2~rc1-1
+- Update to v1.13.2rc1
+
 * Wed Mar 10 2021 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.12.0-1
 - Update to v1.12.0
 
