@@ -6,12 +6,6 @@
 
 %global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
 
-%if (0%{?suse_version} > 0)
-%global __debug_package 1
-%global _debuginfo_subpackages 0
-%debug_package
-%endif
-
 Name: libfabric
 Version: %{major}.%{minor}.%{bugrelease}%{?prerelease:~%{prerelease}}
 Release: 1%{?dist}
@@ -89,6 +83,12 @@ Requires: libpsm2-devel >= 11.2.78
 
 %description devel
 Development files for the libfabric library.
+
+%if (0%{?suse_version} > 0)
+%global __debug_package 1
+%global _debuginfo_subpackages 0
+%debug_package
+%endif
 
 %prep
 %autosetup -p1 -n libfabric-%dl_version
