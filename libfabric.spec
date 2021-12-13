@@ -8,7 +8,7 @@
 
 Name: libfabric
 Version: %{major}.%{minor}.%{bugrelease}%{?prerelease:~%{prerelease}}
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
 License: GPL-2.0-only OR BSD-2-Clause
@@ -19,7 +19,6 @@ License: GPLv2 or BSD
 %endif
 Url: https://www.github.com/ofiwg/libfabric
 Source: https://github.com/ofiwg/%{name}/archive/v%{dl_version}.tar.gz
-Patch0: https://github.com/daos-stack/libfabric/daos-9173-ofi.patch
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel >= 1.0.16
@@ -148,6 +147,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Mon Dec 13 2021 Johann Lombardi <johann.lombardi@intel.com> - 1.14.0~rc3-3
+- Revert fi_cancel patch from DAOS-9173
+
 * Wed Dec 8 2021 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.14.0~rc3-2
 - Apply patch for DAOS-9173
 

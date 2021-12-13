@@ -1,3 +1,9 @@
+libfabric (1.14.0~rc3-3) unstable; urgency=medium
+  [ Johann Lombardi ]
+  * Revert fi_cancel patch from DAOS-9173
+
+ -- Johann Lombardi <johann.lombardi@intel.com>  Mon, 13 Dec 2021 09:00:00 -0000
+
 libfabric (1.14.0~rc3-2) unstable; urgency=medium
   [ Alexander Oganezov ]
   * Apply OFI patch to fix DAOS-9173
@@ -158,7 +164,7 @@ libfabric (1.3.0-4) unstable; urgency=medium
 libfabric (1.3.0-3) unstable; urgency=medium
 
   * Update watch file. Upstream uses github only now.
-  * Install libfabric.pc. Thanks Marcin Ślusarz. (Closes: #826222)
+  * Install libfabric.pc. Thanks Marcin Slusarz. (Closes: #826222)
   * Point Vcs-* fields to HTTPS URLs
   * Enable hardening.
   * Add patch with a few typo fixes.
