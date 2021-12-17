@@ -8,7 +8,7 @@
 
 Name: libfabric
 Version: %{major}.%{minor}.%{bugrelease}%{?prerelease:~%{prerelease}}
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
 License: GPL-2.0-only OR BSD-2-Clause
@@ -85,6 +85,12 @@ Requires: libpsm2-devel >= 11.2.78
 %description devel
 Development files for the libfabric library.
 
+%if (0%{?suse_version} > 0)
+%global __debug_package 1
+%global _debuginfo_subpackages 0
+%debug_package
+%endif
+
 %prep
 %autosetup -p1 -n libfabric-%dl_version
 
@@ -148,6 +154,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Fri Dec 17 2021 Phillip Henderson <phillip.henderson@intel.com> - 1.14.0~rc3-3
+- Enable building debuginfo package on SUSE platforms
+
 * Wed Dec 8 2021 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.14.0~rc3-2
 - Apply patch for DAOS-9173
 
