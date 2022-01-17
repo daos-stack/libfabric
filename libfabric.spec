@@ -2,13 +2,12 @@
 %global major 1
 %global minor 14
 %global bugrelease 0
-%global prerelease rc3
 
 %global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
 
 Name: libfabric
 Version: %{major}.%{minor}.%{bugrelease}%{?prerelease:~%{prerelease}}
-Release: 3%{?dist}
+Release: 1%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
 License: GPL-2.0-only OR BSD-2-Clause
@@ -20,6 +19,7 @@ License: GPLv2 or BSD
 Url: https://www.github.com/ofiwg/libfabric
 Source: https://github.com/ofiwg/%{name}/archive/v%{dl_version}.tar.gz
 Patch0: https://github.com/daos-stack/libfabric/daos-9173-ofi.patch
+Patch1: https://github.com/daos-stack/libfabric/daos-9376-ofi.patch
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel >= 1.0.16
@@ -154,6 +154,10 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Mon Jan 17 2022 Johann Lombardi <johann.lombardi@intel.com> - 1.14.0-1
+- Upgrade to 1.14.0 GA
+- Apply patch for DAOS-9376
+
 * Fri Dec 17 2021 Phillip Henderson <phillip.henderson@intel.com> - 1.14.0~rc3-3
 - Enable building debuginfo package on SUSE platforms
 
