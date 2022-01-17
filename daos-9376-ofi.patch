@@ -83,9 +83,9 @@ index 49be93c730..276f932c05 100644
 +			     vrb_wr2wc_opcode(ctx->sq_opcode) : IBV_WC_RECV;
 +
 +		if (ctx->op_queue == VRB_OP_SRQ) {
- 			ofi_mutex_lock(&ctx->srx->ctx_lock);
+ 			fastlock_acquire(&ctx->srx->ctx_lock);
  			ofi_buf_free(ctx);
- 			ofi_mutex_unlock(&ctx->srx->ctx_lock);
+ 			fastlock_release(&ctx->srx->ctx_lock);
 diff --git a/prov/verbs/src/verbs_ep.c b/prov/verbs/src/verbs_ep.c
 index c11e990610..632ad799be 100644
 --- a/prov/verbs/src/verbs_ep.c
