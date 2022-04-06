@@ -7,7 +7,7 @@
 
 Name: libfabric
 Version: %{major}.%{minor}.%{bugrelease}%{?prerelease:~%{prerelease}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
 License: GPL-2.0-only OR BSD-2-Clause
@@ -20,6 +20,8 @@ Url: https://www.github.com/ofiwg/libfabric
 Source: https://github.com/ofiwg/%{name}/archive/v%{dl_version}.tar.gz
 Patch0: https://github.com/daos-stack/libfabric/daos-9173-ofi.patch
 Patch1: https://github.com/daos-stack/libfabric/daos-9376-ofi.patch
+Patch2: https://github.com/daos-stack/libfabric/tcp_provider.patch
+Patch3: https://github.com/daos-stack/libfabric/revert.patch
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel >= 1.0.16
@@ -154,6 +156,10 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Mon Apr 04 2022 Dmitry Eremin <dmitry.eremin@intel.com> - 1.14.0-2
+- Apply patch for TCP provider
+- Revert patch with performance degradation
+
 * Mon Jan 17 2022 Johann Lombardi <johann.lombardi@intel.com> - 1.14.0-1
 - Upgrade to 1.14.0 GA
 - Apply patch for DAOS-9376
