@@ -132,9 +132,6 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_bindir}/fi_info
 %{_bindir}/fi_pingpong
 %{_bindir}/fi_strerror
-%if 0%{?rhel} >= 7
-%{_libdir}/pkgconfig/%{name}.pc
-%endif
 %{_mandir}/man1/*
 %doc NEWS.md
 %license COPYING
@@ -232,7 +229,7 @@ rm -f %{buildroot}%{_libdir}/*.la
 - Accordingly, devel subpackage should Requires: psm2-devel
 
 * Mon Sep 23 2019 Brian J. Murrell <brian.murrell@intel.com> - 1.8.0-4
-- %setup -> %autosetup
+- %%setup -> %%autosetup
 - Add patch to bring up to 3712eb0
 - Set _default_patch_fuzz 1 due to GitHub's dirty compare/ patches
 - Once again create the libfabric1 subpackage for SLES
