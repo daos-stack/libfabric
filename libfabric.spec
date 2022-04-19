@@ -48,12 +48,12 @@ BuildRequires: autoconf, automake, libtool
 
 %ifarch x86_64
 %if 0%{?suse_version} >= 01315 || 0%{?rhel} >= 7
-%global configopts --disable-sockets --enable-verbs --enable-usnic --disable-static --enable-psm2 --disable-efa --without-gdrcopy --enable-tcp 
+%global configopts --disable-sockets --enable-verbs --enable-usnic --disable-static --enable-psm2 --disable-efa --without-gdrcopy --disable-opx --enable-tcp 
 %else
-%global configopts --disable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy --enable-tcp
+%global configopts --disable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy --disable-opx --enable-tcp
 %endif
 %else
-%global configopts --disable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy --enable-tcp
+%global configopts --disable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy --disable-opx --enable-tcp
 %endif
 
 %description
