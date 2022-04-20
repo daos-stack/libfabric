@@ -46,14 +46,11 @@ BuildRequires: valgrind-devel
 # to be able to generate configure if not present
 BuildRequires: autoconf, automake, libtool
 
+%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy --disable-opx --enable-tcp
 %ifarch x86_64
 %if 0%{?suse_version} >= 01315 || 0%{?rhel} >= 7
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --enable-psm2 --disable-efa --without-gdrcopy --disable-opx --enable-tcp 
-%else
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy --disable-opx --enable-tcp
+%global configopts %{configopts} --enable-psm2
 %endif
-%else
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy --disable-opx --enable-tcp
 %endif
 
 %description
