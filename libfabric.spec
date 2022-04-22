@@ -1,13 +1,14 @@
 %define suse_libname libfabric1
 %global major 1
-%global minor 14
+%global minor 15
 %global bugrelease 0
+%global prerelease rc3
 
 %global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
 
 Name: libfabric
 Version: %{major}.%{minor}.%{bugrelease}%{?prerelease:~%{prerelease}}
-Release: 2%{?dist}
+Release: 1%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 %if 0%{?suse_version} >= 1315
 License: GPL-2.0-only OR BSD-2-Clause
@@ -18,10 +19,6 @@ License: GPLv2 or BSD
 %endif
 Url: https://www.github.com/ofiwg/libfabric
 Source: https://github.com/ofiwg/%{name}/archive/v%{dl_version}.tar.gz
-Patch0: https://github.com/daos-stack/libfabric/daos-9173-ofi.patch
-Patch1: https://github.com/daos-stack/libfabric/daos-9376-ofi.patch
-Patch2: https://github.com/daos-stack/libfabric/tcp_provider.patch
-Patch3: https://github.com/daos-stack/libfabric/revert.patch
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel >= 1.0.16
@@ -49,14 +46,11 @@ BuildRequires: valgrind-devel
 # to be able to generate configure if not present
 BuildRequires: autoconf, automake, libtool
 
+%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy --disable-opx --enable-tcp
 %ifarch x86_64
 %if 0%{?suse_version} >= 01315 || 0%{?rhel} >= 7
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --enable-psm2 --disable-efa --without-gdrcopy
-%else
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy
+%global configopts %{configopts} --enable-psm2
 %endif
-%else
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy
 %endif
 
 %description
@@ -153,6 +147,10 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Tue Apr 19 2022 Lei Huang <lei.huang@intel.com> - 1.15.0~rc3-1
+- Update to v1.15.0rc3
+- Remove patches already landed
+
 * Mon Apr 04 2022 Dmitry Eremin <dmitry.eremin@intel.com> - 1.14.0-2
 - Apply patch for TCP provider
 - Revert patch with performance degradation
