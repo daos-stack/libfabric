@@ -2,7 +2,6 @@
 %global major 1
 %global minor 15
 %global bugrelease 0
-%global prerelease rc3
 
 %global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
 
@@ -147,6 +146,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Tue May 3 2022 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.15.0-1
+- Update to v1.15.0
+
 * Tue Apr 19 2022 Lei Huang <lei.huang@intel.com> - 1.15.0~rc3-1
 - Update to v1.15.0rc3
 - Remove patches already landed
