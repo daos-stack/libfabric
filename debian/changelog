@@ -1,5 +1,5 @@
 libfabric (1.15.0-1) unstable; urgency=medium
-  [ Lei Huang ]
+  [ Alexander Oganezov ]
   * Update to 1.15.0 
 
  -- Alexander Oganezov <alexander.a.oganezov@intel.com>  Tue, 3 May 2022 14:00:00 -0500
