@@ -5,17 +5,17 @@
 #%%global prerelease rc3
 
 %global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
+%global _hardened_build 1
 
 Name: libfabric
 Version: %{major}.%{minor}.%{bugrelease}%{?prerelease:~%{prerelease}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: User-space RDMA Fabric Interfaces
+License: GPLv2 or BSD
 %if 0%{?suse_version} >= 1315
-License: GPL-2.0-only OR BSD-2-Clause
 Group: Development/Libraries/C and C++
 %else
 Group: System Environment/Libraries
-License: GPLv2 or BSD
 %endif
 Url: https://www.github.com/ofiwg/libfabric
 Source: https://github.com/ofiwg/%{name}/archive/v%{dl_version}.tar.gz
@@ -91,6 +91,10 @@ Development files for the libfabric library.
 %autosetup -p1 -n libfabric-%dl_version
 
 %build
+%if (0%{?suse_version} > 0)
+export CFLAGS="%{optflags} -fPIC -pie"
+export CXXFLAGS="%{optflags} -fPIC -pie"
+%endif
 if [ ! -f configure ]; then
     ./autogen.sh
 fi
@@ -147,8 +151,12 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
-* Tue May 3 2022 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.15.0-1
+* Fri May 6 2022 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.15.0-1
 - Update to v1.15.0
+
+* Wed May  4 2022 Brian J. Murrell <brian.murrell@intel.com> - 1.15.0~rc3-2
+- Add _hardened_build flag to build PIE binaries on CentOS 7
+- Add optoins to C*FLAGS to build PIE binaries on Leap 15
 
 * Tue Apr 19 2022 Lei Huang <lei.huang@intel.com> - 1.15.0~rc3-1
 - Update to v1.15.0rc3
