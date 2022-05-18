@@ -2,7 +2,6 @@
 %global major 1
 %global minor 15
 %global bugrelease 1
-#%global prerelease rc3
 
 %global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
 %global _hardened_build 1
