@@ -1,15 +1,15 @@
 %define suse_libname libfabric1
 %global major 1
 %global minor 15
-%global bugrelease 0
-%global prerelease rc3
+%global bugrelease 1
+#%global prerelease rc3
 
 %global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
 %global _hardened_build 1
 
 Name: libfabric
 Version: %{major}.%{minor}.%{bugrelease}%{?prerelease:~%{prerelease}}
-Release: 2%{?dist}
+Release: 1%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 License: GPLv2 or BSD
 %if 0%{?suse_version} >= 1315
@@ -151,6 +151,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Wed May 18 2022 Lei Huang <lei.huang@intel.com> - 1.15.1-1
+- Update to v1.15.1
+
 * Wed May  4 2022 Brian J. Murrell <brian.murrell@intel.com> - 1.15.0~rc3-2
 - Add _hardened_build flag to build PIE binaries on CentOS 7
 - Add optoins to C*FLAGS to build PIE binaries on Leap 15

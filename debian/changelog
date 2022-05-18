@@ -1,3 +1,9 @@
+libfabric (1.15.1-1) unstable; urgency=medium
+  [ Lei Huang ]
+  * Update to 1.15.1 to get the patch to fix the tcp performance issue in 1.14
+
+ -- Lei Huang <lei.huang@intel.com>  Wed, 18 May 2022 16:00:00 -0500
+
 libfabric (1.15.0~rc3-1) unstable; urgency=medium
   [ Lei Huang ]
   * Update to 1.15.0rc3 to get the latest patch to fix tcp performance
