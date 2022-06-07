@@ -1,7 +1,7 @@
 %define suse_libname libfabric1
 %global major 1
-%global minor 15
-%global bugrelease 1
+%global minor 14
+%global bugrelease 0
 #%%global prerelease rc3
 
 %global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
@@ -9,7 +9,7 @@
 
 Name: libfabric
 Version: %{major}.%{minor}.%{bugrelease}%{?prerelease:~%{prerelease}}
-Release: 1%{?dist}
+Release: 3%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 License: GPLv2 or BSD
 %if 0%{?suse_version} >= 1315
