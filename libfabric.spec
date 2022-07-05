@@ -9,7 +9,7 @@
 
 Name: libfabric
 Version: %{major}.%{minor}.%{bugrelease}%{?prerelease:~%{prerelease}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 License: GPLv2 or BSD
 %if 0%{?suse_version} >= 1315
@@ -19,6 +19,7 @@ Group: System Environment/Libraries
 %endif
 Url: https://www.github.com/ofiwg/libfabric
 Source: https://github.com/ofiwg/%{name}/archive/v%{dl_version}.tar.gz
+Patch0: cxi_provider.patch
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel >= 1.0.16
@@ -151,6 +152,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Tue Jul  5 2022 Jerome Soumagne <jerome.soumagne@intel.com> - 1.15.1-2
+- Add patch to keep backward compatibility with CXI provider using v1.14.x
+
 * Wed May 18 2022 Lei Huang <lei.huang@intel.com> - 1.15.1-1
 - Update to v1.15.1
 
