@@ -152,7 +152,7 @@ rm -f %{buildroot}%{_libdir}/*.la
 
 %changelog
 * Mon Aug  1 2022 Jerome Soumagne <jerome.soumagne@intel.com> - 1.15.1-3
-- Drop CXI compat patch after HPE upgrade to 1.15.1
+- Drop CXI compat patch that is no longer needed
 
 * Tue Jul  5 2022 Jerome Soumagne <jerome.soumagne@intel.com> - 1.15.1-2
 - Add patch to keep backward compatibility with CXI provider using v1.14.x
