@@ -46,12 +46,12 @@ BuildRequires: valgrind-devel
 # to be able to generate configure if not present
 BuildRequires: autoconf, automake, libtool
 
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy --disable-opx --enable-tcp
-%ifarch x86_64
-%if 0%{?suse_version} >= 01315 || 0%{?rhel} >= 7
-%global configopts %{configopts} --enable-psm2
-%endif
-%endif
+%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy --enable-opx --enable-tcp
+#%ifarch x86_64
+#%if 0%{?suse_version} >= 01315 || 0%{?rhel} >= 7
+#%global configopts %{configopts} --enable-psm2
+#%endif
+#%endif
 
 %description
 libfabric provides a user-space API to access high-performance fabric
