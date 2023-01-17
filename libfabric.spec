@@ -1,7 +1,7 @@
 %define suse_libname libfabric1
 %global major 1
-%global minor 15
-%global bugrelease 1
+%global minor 17
+%global bugrelease 0
 #%%global prerelease rc3
 
 %global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
@@ -9,7 +9,7 @@
 
 Name: libfabric
 Version: %{major}.%{minor}.%{bugrelease}%{?prerelease:~%{prerelease}}
-Release: 3%{?dist}
+Release: 1%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 License: GPLv2 or BSD
 %if 0%{?suse_version} >= 1315
@@ -151,6 +151,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Tue Jan 17 2023 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.17.0-1
+- Update to v1.17.0
+
 * Mon Aug  1 2022 Jerome Soumagne <jerome.soumagne@intel.com> - 1.15.1-3
 - Drop CXI compat patch that is no longer needed
 
