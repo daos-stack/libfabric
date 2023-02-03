@@ -41,5 +41,6 @@
 //@Library(value="pipeline-lib@your_branch") _
 
 /* groovylint-disable-next-line CompileStatic */
-packageBuildingPipelineDAOS(['distros': ['centos7', 'el8', 'leap15', 'ubuntu20.04'],
-                             'make args': 'DISTRO_VERSION_EL8=8.4'])
+packageBuildingPipelineDAOSTest(['distros': ['centos7', 'el8', 'leap15', 'ubuntu20.04'],
+                                 'make args': 'DISTRO_VERSION_EL8=8.4',
+                                 'test-tag': 'pr,hw'])
