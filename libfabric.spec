@@ -1,8 +1,8 @@
 %define suse_libname libfabric1
 %global major 1
 %global minor 17
-%global bugrelease 0
-#%%global prerelease rc3
+%global bugrelease 1
+%global prerelease rc1
 
 %global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
 %global _hardened_build 1
@@ -146,8 +146,8 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
-* Tue Jan 17 2023 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.17.0-1
-- Update to v1.17.0
+* Sat Feb 25 2023 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.17.1~rc1-1
+- Update to v1.17.1rc1
 
 * Mon Aug  1 2022 Jerome Soumagne <jerome.soumagne@intel.com> - 1.15.1-3
 - Drop CXI compat patch that is no longer needed
