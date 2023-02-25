@@ -40,6 +40,11 @@ BuildRequires: valgrind-devel
 BuildRequires: autoconf, automake, libtool
 
 %global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy --disable-psm2 --disable-opx --enable-tcp
+%ifarch x86_64
+%if 0%{?suse_version} >= 01315 || 0%{?rhel} >= 7
+%global configopts %{configopts}
+%endif
+%endif
 
 %description
 libfabric provides a user-space API to access high-performance fabric
