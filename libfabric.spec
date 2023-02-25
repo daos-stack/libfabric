@@ -31,13 +31,6 @@ BuildRequires: libibverbs-devel >= 1.2.0
 BuildRequires: libnl3-devel
 BuildRequires: fdupes
 
-# infinipath-psm-devel only available for x86_64
-%ifarch x86_64
-# BuildRequires: infinipath-psm-devel
-%if 0%{?suse_version} >= 1315 || 0%{?rhel} >= 7
-BuildRequires: libpsm2-devel >= 11.2.78
-%endif
-%endif
 # valgrind is unavailable for s390
 %ifnarch s390
 BuildRequires: valgrind-devel
@@ -71,7 +64,6 @@ Requires: %{suse_libname}%{?_isa} = %{version}-%{release}
 Group: System Environment/Libraries
 Requires: %{name}%{?_isa} = %{version}-%{release}
 %endif
-Requires: libpsm2-devel >= 11.2.78
 
 %description devel
 Development files for the libfabric library.
@@ -148,6 +140,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %changelog
 * Sat Feb 25 2023 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.17.1~rc1-1
 - Update to v1.17.1rc1
+
+* Thu Jan 26 2023 Brian J. Murrell <brian.murrell@intel.com> - 1.15.1-4
+- Remove libpsm2[-devel] dependencies
 
 * Mon Aug  1 2022 Jerome Soumagne <jerome.soumagne@intel.com> - 1.15.1-3
 - Drop CXI compat patch that is no longer needed
