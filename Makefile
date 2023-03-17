@@ -1,6 +1,5 @@
 NAME    := libfabric
-SRC_EXT := gz
-#DL_VERSION := 1.11.1rc1
+SRC_EXT := bz2
 
 OSUSE_HPC_REPO := https://download.opensuse.org/repositories/science:/HPC
 
@@ -13,5 +12,4 @@ include packaging/Makefile_packaging.mk
 test:
 	$(call install_repos,$(NAME)@$(BRANCH_NAME):$(BUILD_NUMBER))
 	yum -y install libfabric
-	fi_info -l | grep ^psm2:
 	fi_info -l | grep ^verbs:

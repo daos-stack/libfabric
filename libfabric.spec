@@ -1,82 +1,87 @@
 %define suse_libname libfabric1
-%global major 1
-%global minor 17
-%global bugrelease 1
-#%%global prerelease rc1
 
-%global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
+%global __remake_config 0
 %global _hardened_build 1
 
-Name: libfabric
-Version: %{major}.%{minor}.%{bugrelease}%{?prerelease:~%{prerelease}}
-Release: 1%{?dist}
-Summary: User-space RDMA Fabric Interfaces
-License: GPLv2 or BSD
-%if 0%{?suse_version} >= 1315
-Group: Development/Libraries/C and C++
-%else
-Group: System Environment/Libraries
-%endif
-Url: https://www.github.com/ofiwg/libfabric
-Source: https://github.com/ofiwg/%{name}/archive/v%{dl_version}.tar.gz
-Patch0: DAOS-12407-ofi-patch.diff
+Name:           libfabric
+Version:        1.18.0
+Release:        1%{?dist}
 
+# dl_version is version with ~ removed
+%{lua:
+    rpm.define("dl_version " .. string.gsub(rpm.expand("%{version}"), "~", ""))
+}
+
+Summary:        Open Fabric Interfaces
+License:        BSD or GPLv2
+%if 0%{?suse_version} >= 01315
+Group:          Development/Libraries/C and C++
+Requires:       %{suse_libname}%{?_isa} = %{version}-%{release}
+%else
+Group:          System Environment/Libraries
+%endif
+URL:            https://github.com/ofiwg/libfabric
+Source0:        https://github.com/ofiwg/%{name}/releases/download/v%{dl_version}/%{name}-%{dl_version}.tar.bz2
+
+%if %{__remake_config}
+BuildRequires:  automake
+BuildRequires:  autoconf
+BuildRequires:  libtool
+%endif
+BuildRequires:  gcc
+BuildRequires:  make
+BuildRequires:  libnl3-devel
+BuildRequires:  libibverbs-devel
 %if 0%{?rhel} >= 7
-BuildRequires: librdmacm-devel >= 1.0.16
+BuildRequires:  librdmacm-devel
+BuildRequires:  numactl-devel
 %else
 %if 0%{?suse_version} >= 1315
-BuildRequires: rdma-core-devel >= 1.0.16
+BuildRequires:  rdma-core-devel
+BuildRequires:  libnuma-devel
 %endif
 %endif
-BuildRequires: libibverbs-devel >= 1.2.0
-BuildRequires: libnl3-devel
-BuildRequires: fdupes
-
-# valgrind is unavailable for s390
-%ifnarch s390
-BuildRequires: valgrind-devel
-%endif
-
-# to be able to generate configure if not present
-BuildRequires: autoconf, automake, libtool
-
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy --disable-psm2 --disable-opx --enable-tcp
-%ifarch x86_64
-%if 0%{?suse_version} >= 01315 || 0%{?rhel} >= 7
-%global configopts %{configopts}
-%endif
-%endif
-
-%if 0%{?suse_version}
-Requires: %{suse_libname}%{?_isa} = %{version}-%{release}
+BuildRequires:  valgrind-devel
+# required by OPX provider
+%if 0%{?rhel} >= 8 || 0%{?suse_version} >= 1315
+BuildRequires:  libuuid-devel
 %endif
 
 %description
-libfabric provides a user-space API to access high-performance fabric
-services, such as RDMA.
+OpenFabrics Interfaces (OFI) is a framework focused on exporting fabric
+communication services to applications.  OFI is best described as a collection
+of libraries and applications used to export fabric services.  The key
+components of OFI are: application interfaces, provider libraries, kernel
+services, daemons, and test applications.
+
+Libfabric is a core component of OFI.  It is the library that defines and
+exports the user-space API of OFI, and is typically the only software that
+applications deal with directly.  It works in conjunction with provider
+libraries, which are often integrated directly into libfabric.
 
 %if 0%{?suse_version} >= 01315
 %package -n %{suse_libname}
-Summary: Shared library for libfabric
-Group:  System/Libraries
+Summary:        Shared library for libfabric
+Group:          System/Libraries
 
 %description -n %{suse_libname}
-libfabric provides a user-space API to access high-performance fabric
+%{name} provides a user-space API to access high-performance fabric
 services, such as RDMA. This package contains the runtime library.
 %endif
 
-%package devel
-Summary: Development files for the libfabric library
+%package        devel
+Summary:        Development files for %{name}
 %if 0%{?suse_version} >= 01315
-Group: Development/Libraries/C and C++
-Requires: %{suse_libname}%{?_isa} = %{version}-%{release}
+Group:          Development/Libraries/C and C++
+Requires:       %{suse_libname}%{?_isa} = %{version}-%{release}
 %else
-Group: System Environment/Libraries
-Requires: %{name}%{?_isa} = %{version}-%{release}
+Group:          System Environment/Libraries
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 %endif
 
-%description devel
-Development files for the libfabric library.
+%description    devel
+The %{name}-devel package contains libraries and header files for
+developing applications that use %{name}.
 
 %if (0%{?suse_version} > 0)
 %global __debug_package 1
@@ -85,69 +90,104 @@ Development files for the libfabric library.
 %endif
 
 %prep
-%autosetup -p1 -n libfabric-%dl_version
+%autosetup -p1 -n %{name}-%{dl_version}
 
 %build
+%if %{__remake_config}
+./autogen.sh
+%endif
 %if (0%{?suse_version} > 0)
 export CFLAGS="%{optflags} -fPIC -pie"
 export CXXFLAGS="%{optflags} -fPIC -pie"
 %endif
-if [ ! -f configure ]; then
-    ./autogen.sh
-fi
 # defaults: with-dlopen can be over-rode:
-%configure %{?_without_dlopen} %{configopts} \
-%ifnarch s390
-        --with-valgrind
+%configure  --disable-static          \
+            --disable-silent-rules    \
+            %{?_without_dlopen}       \
+            --with-valgrind           \
+            --enable-sockets          \
+            --enable-tcp              \
+            --enable-verbs            \
+            --enable-rxm              \
+            --enable-shm              \
+%if 0%{?rhel} >= 8 || 0%{?suse_version} >= 1315
+            --enable-opx              \
+%else
+            --disable-opx             \
 %endif
+            --disable-usnic           \
+            --disable-efa             \
+            --disable-dmabuf_peer_mem \
+            --disable-hook_hmem       \
+            --disable-hook_debug      \
+            --disable-trace           \
+            --disable-perf            \
+            --disable-rstream         \
+            --disable-rxd             \
+            --disable-mrail           \
+            --disable-udp             \
+            --disable-psm             \
+            --disable-psm2            \
+            --disable-psm3            \
+            --disable-gni             \
+            --disable-bgq
+
 sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+%make_build
 
-make %{?_smp_mflags} V=1
 
 %install
 %make_install
-# remove unpackaged files from the buildroot
-rm -f %{buildroot}%{_libdir}/*.la
-%fdupes %{buildroot}/%{_prefix}
+find %{buildroot} -name '*.la' -exec rm -f {} ';'
+
 
 %if 0%{?suse_version} >= 01315
 %post -n %{suse_libname} -p /sbin/ldconfig
 %postun -n %{suse_libname} -p /sbin/ldconfig
 %else
-%post -p /sbin/ldconfig
-%postun -p /sbin/ldconfig
+%ldconfig_scriptlets
 %endif
+
 
 %files
 %defattr(-,root,root,-)
-%if 0%{?rhel} >= 7
-%{_libdir}/libfabric.so.*
-%endif
+%license COPYING
+%doc NEWS.md
 %{_bindir}/fi_info
 %{_bindir}/fi_pingpong
 %{_bindir}/fi_strerror
-%{_mandir}/man1/*
-%doc NEWS.md
-%license COPYING
+%if 0%{?rhel} >= 7
+%{_libdir}/*.so.1*
+%endif
+%{_mandir}/man1/*.1*
 
 %if 0%{?suse_version} >= 01315
 %files -n %{suse_libname}
 %defattr(-,root,root)
-%{_libdir}/libfabric.so.*
-%license COPYING
-%doc AUTHORS README
+%{_libdir}/*.so.1*
 %endif
 
 %files devel
 %defattr(-,root,root)
-%{_libdir}/libfabric.so
+%license COPYING
+%doc AUTHORS README
+# We knowingly share this with kernel-headers and librdmacm-devel
+# https://github.com/ofiwg/libfabric/issues/1277
+%{_includedir}/rdma/
+%{_libdir}/*.so
 %{_libdir}/pkgconfig/%{name}.pc
-%{_includedir}/*
-%{_mandir}/man3/*
-%{_mandir}/man7/*
+%{_mandir}/man3/*.3*
+%{_mandir}/man7/*.7*
 
 %changelog
+* Thu Apr 13 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.18.0-1
+- Update to 1.18.0
+- Enable opx provider and add libuuid-devel dependency
+- Add libnuma/numactl-devel dependency
+- Clean up spec file and disable unused / deprecated providers
+- Use tar.bz2 archive instead of tar.gz to skip autogen process
+
 * Thu Apr 13 2023 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.17.1-1
 - Update to v1.17.1
 - Apply DAOS-12407 workaround to ofi

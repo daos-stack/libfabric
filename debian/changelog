@@ -1,3 +1,12 @@
+libfabric (1.18.0-1) unstable; urgency=medium
+  [ Jerome Soumagne ]
+  * Update to 1.18.0
+  * Add libnuma-dev dependency
+  * Clean up spec file and disable unused / deprecated providers
+  * Use tar.bz2 archive instead of tar.gz to skip autogen process
+
+ -- Jerome Soumagne <jerome.soumagne@intel.com>  Thu, 13 Apr 2023 17:00:00 -0600
+
 libfabric (1.17.1-1) unstable; urgency=medium
   [ Alexander Oganezov ]
   * Update to v1.17.1
