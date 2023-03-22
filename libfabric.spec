@@ -19,6 +19,7 @@ Group: System Environment/Libraries
 %endif
 Url: https://www.github.com/ofiwg/libfabric
 Source: https://github.com/ofiwg/%{name}/archive/v%{dl_version}.tar.gz
+Patch0: DAOS-12407-ofi-patch.diff
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel >= 1.0.16
@@ -143,8 +144,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
-* Sat Feb 25 2023 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.17.1~rc1-1
+* Wed Mar 22 2023 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.17.1~rc1-1
 - Update to v1.17.1rc1
+- Apply DAOS-12407 workaround to ofi
 
 * Thu Jan 26 2023 Brian J. Murrell <brian.murrell@intel.com> - 1.15.1-4
 - Remove libpsm2[-devel] dependencies
