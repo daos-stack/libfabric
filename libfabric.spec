@@ -2,7 +2,7 @@
 %global major 1
 %global minor 17
 %global bugrelease 1
-%global prerelease rc1
+#%%global prerelease rc1
 
 %global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
 %global _hardened_build 1
@@ -144,8 +144,8 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
-* Wed Mar 22 2023 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.17.1~rc1-1
-- Update to v1.17.1rc1
+* Wed Apr 5 2023 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.17.1-1
+- Update to v1.17.1
 - Apply DAOS-12407 workaround to ofi
 
 * Thu Jan 26 2023 Brian J. Murrell <brian.murrell@intel.com> - 1.15.1-4
