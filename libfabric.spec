@@ -47,13 +47,13 @@ BuildRequires: autoconf, automake, libtool
 %endif
 %endif
 
-%description
-libfabric provides a user-space API to access high-performance fabric
-services, such as RDMA.
-
 %if 0%{?suse_version}
 Requires: %{suse_libname}%{?_isa} = %{version}-%{release}
 %endif
+
+%description
+libfabric provides a user-space API to access high-performance fabric
+services, such as RDMA.
 
 %if 0%{?suse_version} >= 01315
 %package -n %{suse_libname}
