@@ -1,5 +1,5 @@
 #!/usr/bin/groovy
-/* Copyright (C) 2019-2022 Intel Corporation
+/* Copyright (C) 2019-2023 Intel Corporation
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,5 +43,4 @@
 /* groovylint-disable-next-line CompileStatic */
 packageBuildingPipelineDAOSTest(['distros': ['el8', 'centos7', 'leap15', 'ubuntu20.04'],
                                  'make args': 'DISTRO_VERSION_EL8=8.5',
-                                 'rpmlint_rpms_allow_errors': true,
                                  'test-tag': 'daosio'])

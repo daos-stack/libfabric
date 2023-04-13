@@ -148,7 +148,7 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
-* Wed Apr 5 2023 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.17.1-1
+* Thu Apr 13 2023 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.17.1-1
 - Update to v1.17.1
 - Apply DAOS-12407 workaround to ofi
 
