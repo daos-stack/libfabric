@@ -6,18 +6,15 @@ include /usr/share/dpkg/pkg-info.mk
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
 configure_providers = \
-	--enable-psm=yes \
-	--enable-psm2=yes \
-	--enable-sockets=yes \
-	--enable-verbs=yes \
-	--enable-usnic=no \
-	--enable-gni=no \
-	--enable-udp=yes \
-	--enable-rxm=yes \
-	--enable-rxd=yes \
-	--enable-bgq=no \
-	--enable-efa=no \
+	--enable-sockets \
+	--enable-verbs \
+	--enable-usnic \
+	--disable-static \
+	--disable-efa \
 	--without-gdrcopy \
+	--disable-psm2 \
+	--disable-opx \
+	--enable-tcp \
 	$(NULL)
 
 %:

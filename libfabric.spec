@@ -1,15 +1,15 @@
 %define suse_libname libfabric1
 %global major 1
-%global minor 15
+%global minor 17
 %global bugrelease 1
-#%%global prerelease rc3
+#%%global prerelease rc1
 
 %global dl_version %{major}.%{minor}.%{bugrelease}%{?prerelease:%{prerelease}}
 %global _hardened_build 1
 
 Name: libfabric
 Version: %{major}.%{minor}.%{bugrelease}%{?prerelease:~%{prerelease}}
-Release: 4%{?dist}
+Release: 1%{?dist}
 Summary: User-space RDMA Fabric Interfaces
 License: GPLv2 or BSD
 %if 0%{?suse_version} >= 1315
@@ -19,6 +19,7 @@ Group: System Environment/Libraries
 %endif
 Url: https://www.github.com/ofiwg/libfabric
 Source: https://github.com/ofiwg/%{name}/archive/v%{dl_version}.tar.gz
+Patch0: DAOS-12407-ofi-patch.diff
 
 %if 0%{?rhel} >= 7
 BuildRequires: librdmacm-devel >= 1.0.16
@@ -39,11 +40,15 @@ BuildRequires: valgrind-devel
 # to be able to generate configure if not present
 BuildRequires: autoconf, automake, libtool
 
-%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy --disable-opx --enable-tcp
+%global configopts --enable-sockets --enable-verbs --enable-usnic --disable-static --disable-efa --without-gdrcopy --disable-psm2 --disable-opx --enable-tcp
 %ifarch x86_64
 %if 0%{?suse_version} >= 01315 || 0%{?rhel} >= 7
 %global configopts %{configopts}
 %endif
+%endif
+
+%if 0%{?suse_version}
+Requires: %{suse_libname}%{?_isa} = %{version}-%{release}
 %endif
 
 %description
@@ -143,6 +148,10 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_mandir}/man7/*
 
 %changelog
+* Thu Apr 13 2023 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.17.1-1
+- Update to v1.17.1
+- Apply DAOS-12407 workaround to ofi
+
 * Thu Jan 26 2023 Brian J. Murrell <brian.murrell@intel.com> - 1.15.1-4
 - Remove libpsm2[-devel] dependencies
 
