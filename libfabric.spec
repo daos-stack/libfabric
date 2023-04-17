@@ -184,7 +184,7 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_mandir}/man7/*.7*
 
 %changelog
-* Thu Apr 13 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.18.0-1
+* Mon Apr 17 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.18.0-1
 - Update to 1.18.0
 - Enable opx provider and add libuuid-devel dependency
 - Add libnuma/numactl-devel dependency
