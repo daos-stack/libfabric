@@ -41,6 +41,7 @@ BuildRequires:  rdma-core-devel
 BuildRequires:  libnuma-devel
 %endif
 %endif
+BuildRequires:  fdupes
 BuildRequires:  valgrind-devel
 # required by OPX provider
 %if 0%{?rhel} >= 8 || 0%{?suse_version} >= 1315
@@ -140,6 +141,8 @@ sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 %install
 %make_install
 find %{buildroot} -name '*.la' -exec rm -f {} ';'
+# remove warnings created by dummy manpages
+%fdupes %{buildroot}/%{_prefix}
 
 
 %if 0%{?suse_version} >= 01315
