@@ -4,8 +4,9 @@ libfabric (1.18.0-1) unstable; urgency=medium
   * Add libnuma-dev dependency
   * Clean up rules file and disable unused / deprecated providers
   * Use tar.bz2 archive instead of tar.gz to skip autogen process
+  * Add prov/verbs patch to recover from qp error state
 
- -- Jerome Soumagne <jerome.soumagne@intel.com>  Mon, 17 Apr 2023 10:00:00 -0600
+ -- Jerome Soumagne <jerome.soumagne@intel.com>  Wed,  3 May 2023 10:00:00 -0600
 
 libfabric (1.17.1-1) unstable; urgency=medium
   [ Alexander Oganezov ]

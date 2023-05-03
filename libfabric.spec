@@ -2,6 +2,12 @@
 
 %global __remake_config 0
 %global _hardened_build 1
+# opx provider not supported on CentOS 7 builds
+%if 0%{?rhel} < 8
+%global __build_opx 0
+%else
+%global __build_opx 1
+%endif
 
 Name:           libfabric
 Version:        1.18.0
@@ -22,6 +28,8 @@ Group:          System Environment/Libraries
 %endif
 URL:            https://github.com/ofiwg/libfabric
 Source0:        https://github.com/ofiwg/%{name}/releases/download/v%{dl_version}/%{name}-%{dl_version}.tar.bz2
+# https://github.com/ofiwg/libfabric/commit/2abe57cd893d70a52137758c2c5b3c7fbf0be2c1.patch
+Patch0:         prov_verbs_recover_qp_error.patch
 
 %if %{__remake_config}
 BuildRequires:  automake
@@ -44,7 +52,7 @@ BuildRequires:  libnuma-devel
 BuildRequires:  fdupes
 BuildRequires:  valgrind-devel
 # required by OPX provider
-%if 0%{?rhel} >= 8 || 0%{?suse_version} >= 1315
+%if %{__build_opx}
 BuildRequires:  libuuid-devel
 %endif
 
@@ -111,7 +119,7 @@ export CXXFLAGS="%{optflags} -fPIC -pie"
             --enable-verbs            \
             --enable-rxm              \
             --enable-shm              \
-%if 0%{?rhel} >= 8 || 0%{?suse_version} >= 1315
+%if %{__build_opx}
             --enable-opx              \
 %else
             --disable-opx             \
@@ -184,12 +192,13 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_mandir}/man7/*.7*
 
 %changelog
-* Mon Apr 17 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.18.0-1
+* Wed May  3 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.18.0-1
 - Update to 1.18.0
 - Enable opx provider and add libuuid-devel dependency
 - Add libnuma/numactl-devel dependency
 - Clean up spec file and disable unused / deprecated providers
 - Use tar.bz2 archive instead of tar.gz to skip autogen process
+- Add prov/verbs patch to recover from qp error state
 
 * Thu Apr 13 2023 Alexander Oganezov <alexander.a.oganezov@intel.com> - 1.17.1-1
 - Update to v1.17.1
