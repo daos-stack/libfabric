@@ -7,14 +7,28 @@ export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
 configure_providers = \
 	--enable-sockets \
-	--enable-verbs \
-	--enable-usnic \
-	--disable-static \
-	--disable-efa \
-	--without-gdrcopy \
-	--disable-psm2 \
-	--disable-opx \
 	--enable-tcp \
+	--enable-verbs \
+	--enable-rxm \
+	--enable-shm \
+	--disable-static \
+	--disable-opx \
+	--disable-usnic \
+	--disable-efa \
+	--disable-dmabuf_peer_mem \
+	--disable-hook_hmem \
+	--disable-hook_debug \
+	--disable-trace \
+	--disable-perf \
+	--disable-rstream \
+	--disable-rxd \
+	--disable-mrail \
+	--disable-udp \
+	--disable-psm \
+	--disable-psm2 \
+	--disable-psm3 \
+	--disable-gni \
+	--disable-bgq \
 	$(NULL)
 
 %:
