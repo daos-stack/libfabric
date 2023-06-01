@@ -11,7 +11,7 @@
 
 Name:           libfabric
 Version:        1.18.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 
 # dl_version is version with ~ removed
 %{lua:
@@ -30,6 +30,8 @@ URL:            https://github.com/ofiwg/libfabric
 Source0:        https://github.com/ofiwg/%{name}/releases/download/v%{dl_version}/%{name}-%{dl_version}.tar.bz2
 # https://github.com/ofiwg/libfabric/commit/2abe57cd893d70a52137758c2c5b3c7fbf0be2c1.patch
 Patch0:         prov_verbs_recover_qp_error.patch
+# https://github.com/ofiwg/libfabric/commit/40c14ba90a8b42f044aa3740599499470e3b4709.patch
+Patch1:         prov_tcp_busy_spin.patch
 
 %if %{__remake_config}
 BuildRequires:  automake
@@ -192,6 +194,9 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_mandir}/man7/*.7*
 
 %changelog
+* Thu Jun  1 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.18.0-2
+- Add prov/tcp patch to fix busy spin issue
+
 * Wed May  3 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.18.0-1
 - Update to 1.18.0
 - Enable opx provider and add libuuid-devel dependency
