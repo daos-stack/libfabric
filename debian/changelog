@@ -1,3 +1,10 @@
+libfabric (1.18.0-3) unstable; urgency=medium
+  [ Jerome Soumagne ]
+  * Add prov/tcp patch to fix registration lock issue
+  * Add prov/opx patch to fix 32-bit conversion issue
+
+ -- Jerome Soumagne <jerome.soumagne@intel.com>  Thu, 14 Jun 2023 10:00:00 -0600
+
 libfabric (1.18.0-2) unstable; urgency=medium
   [ Jerome Soumagne ]
   * Add prov/tcp patch to fix busy spin issue

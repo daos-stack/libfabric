@@ -3,7 +3,7 @@
 %global __remake_config 0
 %global _hardened_build 1
 # opx provider not supported on CentOS 7 builds
-%if 0%{?rhel} < 8
+%if 0%{?rhel} && 0%{?rhel} < 8
 %global __build_opx 0
 %else
 %global __build_opx 1
@@ -11,7 +11,7 @@
 
 Name:           libfabric
 Version:        1.18.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 
 # dl_version is version with ~ removed
 %{lua:
@@ -32,6 +32,10 @@ Source0:        https://github.com/ofiwg/%{name}/releases/download/v%{dl_version
 Patch0:         prov_verbs_recover_qp_error.patch
 # https://github.com/ofiwg/libfabric/commit/40c14ba90a8b42f044aa3740599499470e3b4709.patch
 Patch1:         prov_tcp_busy_spin.patch
+# https://github.com/ofiwg/libfabric/commit/91b05e9d9ee63c49eac032029dc462fa32ef632f.patch
+Patch2:         prov_tcp_reg_lock.patch
+# OPX patch
+Patch3:         prov_opx_u32_extended.patch
 
 %if %{__remake_config}
 BuildRequires:  automake
@@ -194,6 +198,11 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_mandir}/man7/*.7*
 
 %changelog
+* Thu Jun 14 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.18.0-3
+- Add prov/tcp patch to fix registration lock issue
+- Add prov/opx patch to fix 32-bit conversion issue
+- Fix build_opx macro logic
+
 * Thu Jun  1 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.18.0-2
 - Add prov/tcp patch to fix busy spin issue
 
