@@ -198,7 +198,7 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_mandir}/man7/*.7*
 
 %changelog
-* Thu Jun 14 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.18.0-3
+* Wed Jun 14 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.18.0-3
 - Add prov/tcp patch to fix registration lock issue
 - Add prov/opx patch to fix 32-bit conversion issue
 - Fix build_opx macro logic
