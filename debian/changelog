@@ -1,3 +1,10 @@
+libfabric (1.18.1-1) unstable; urgency=medium
+  [ Jerome Soumagne ]
+  * Update to 1.18.1
+  * Drop patches that have been merged to 1.18.1
+
+ -- Jerome Soumagne <jerome.soumagne@intel.com>  Wed,  5 Jul 2023 10:00:00 -0600
+
 libfabric (1.18.0-4) unstable; urgency=medium
   [ Brian J. Murrell ]
   * Release update to keep in sync with RPM
