@@ -1,3 +1,9 @@
+libfabric (1.18.0-4) unstable; urgency=medium
+  [ Brian J. Murrell ]
+  * Release update to keep in sync with RPM
+
+ -- Brian J. Murrell <brian.murrell@intel.com>  Fri, 23 Jun 2023 12:10:30 -0400
+
 libfabric (1.18.0-3) unstable; urgency=medium
   [ Jerome Soumagne ]
   * Add prov/tcp patch to fix registration lock issue
