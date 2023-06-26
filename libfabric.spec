@@ -11,7 +11,7 @@
 
 Name:           libfabric
 Version:        1.18.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 
 # dl_version is version with ~ removed
 %{lua:
@@ -198,6 +198,9 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_mandir}/man7/*.7*
 
 %changelog
+* Fri Jun 23 2023 Brian J. Murrell <brian.murrell@intel.com> - 1.18.0-4
+- Rebuild for EL9
+
 * Wed Jun 14 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.18.0-3
 - Add prov/tcp patch to fix registration lock issue
 - Add prov/opx patch to fix 32-bit conversion issue
