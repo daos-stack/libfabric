@@ -2,8 +2,9 @@ libfabric (1.18.1-1) unstable; urgency=medium
   [ Jerome Soumagne ]
   * Update to 1.18.1
   * Drop patches that have been merged to 1.18.1
+  * Add additional prov/tcp patches
 
- -- Jerome Soumagne <jerome.soumagne@intel.com>  Wed,  5 Jul 2023 10:00:00 -0600
+ -- Jerome Soumagne <jerome.soumagne@intel.com>  Fri, 21 Jul 2023 10:00:00 -0600
 
 libfabric (1.18.0-4) unstable; urgency=medium
   [ Brian J. Murrell ]
