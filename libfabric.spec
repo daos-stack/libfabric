@@ -10,8 +10,8 @@
 %endif
 
 Name:           libfabric
-Version:        1.18.0
-Release:        4%{?dist}
+Version:        1.18.1
+Release:        1%{?dist}
 
 # dl_version is version with ~ removed
 %{lua:
@@ -28,14 +28,11 @@ Group:          System Environment/Libraries
 %endif
 URL:            https://github.com/ofiwg/libfabric
 Source0:        https://github.com/ofiwg/%{name}/releases/download/v%{dl_version}/%{name}-%{dl_version}.tar.bz2
-# https://github.com/ofiwg/libfabric/commit/2abe57cd893d70a52137758c2c5b3c7fbf0be2c1.patch
-Patch0:         prov_verbs_recover_qp_error.patch
-# https://github.com/ofiwg/libfabric/commit/40c14ba90a8b42f044aa3740599499470e3b4709.patch
-Patch1:         prov_tcp_busy_spin.patch
-# https://github.com/ofiwg/libfabric/commit/91b05e9d9ee63c49eac032029dc462fa32ef632f.patch
-Patch2:         prov_tcp_reg_lock.patch
 # OPX patch
-Patch3:         prov_opx_u32_extended.patch
+Patch0:         prov_opx_u32_extended.patch
+Patch1:         prov_tcp_truncation.patch
+Patch2:         prov_tcp_lock_trywait.patch
+Patch3:         prov_tcp_lock_mr.patch
 
 %if %{__remake_config}
 BuildRequires:  automake
@@ -198,6 +195,11 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_mandir}/man7/*.7*
 
 %changelog
+* Fri Jul 21 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.18.1-1
+- Update to 1.18.1
+- Drop patches that have been merged to 1.18.1
+- Add additional prov/tcp patches
+
 * Fri Jun 23 2023 Brian J. Murrell <brian.murrell@intel.com> - 1.18.0-4
 - Rebuild for EL9
 
