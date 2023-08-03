@@ -10,7 +10,7 @@
 %endif
 
 Name:           libfabric
-Version:        1.18.1
+Version:        1.19.0
 Release:        1%{?dist}
 
 # dl_version is version with ~ removed
@@ -28,11 +28,6 @@ Group:          System Environment/Libraries
 %endif
 URL:            https://github.com/ofiwg/libfabric
 Source0:        https://github.com/ofiwg/%{name}/releases/download/v%{dl_version}/%{name}-%{dl_version}.tar.bz2
-# OPX patch
-Patch0:         prov_opx_u32_extended.patch
-Patch1:         prov_tcp_truncation.patch
-Patch2:         prov_tcp_lock_trywait.patch
-Patch3:         prov_tcp_lock_mr.patch
 
 %if %{__remake_config}
 BuildRequires:  automake
@@ -195,6 +190,11 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_mandir}/man7/*.7*
 
 %changelog
+* Tue Sep  5 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.19.0-1
+- Update to 1.19.0
+- Drop prov/tcp patches that were merged in 1.19.0
+- Drop prov/opx patch that was merged in 1.19.0
+
 * Fri Jul 21 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.18.1-1
 - Update to 1.18.1
 - Drop patches that have been merged to 1.18.1
