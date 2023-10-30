@@ -1,0 +1,156 @@
+From b3ad8e95ecb7b1c5d099834d50ca8e3e161440d2 Mon Sep 17 00:00:00 2001
+From: Chien Tin Tung <chien.tin.tung@intel.com>
+Date: Mon, 9 Oct 2023 14:05:32 -0700
+Subject: [PATCH] prov/tcp: Set FI_MULTI_RECV for last completed RX slice
+
+When FI_MULTI_RECV is enabled for an RX buffer, the last
+completed slice of the RX buffer should have FI_MULTI_RECV
+set in the corresponding CQE.
+
+Currently TCP provider assumes the last slice of the RX
+buffer will get completed last and sets FI_MULTI_RECV flag
+when the last slice is used.  Completions can get out of
+order with multiple connections and varied payload sizes
+using the same RX buffer.  Last slice will not always
+complete last.
+
+To make sure the last completed RX buffer slice has
+FI_MULTI_RECV set in the CQE, use a reference counter
+to track outstanding slices.  Count is initialized to 1
+when the RX buffer is first posted and incrememted on
+every slice allocation.  Upon completion, count is
+decremented.  When it reaches 0, FI_MULTI_RECV is set
+for that CQE.
+
+v2 - Minimize impact to non-multi-recv SRX code.
+v3 - Fix completion path, set FI_MULTI_RECV if mrecv is
+     NULL and recv_entry is XNET_MULTI_RECV.
+v4 - Check ctrl_flag against XNET_MULTI_RECV first as mrecv
+     may be garbage.
+
+Signed-off-by: Chien Tin Tung <chien.tin.tung@intel.com>
+---
+ prov/tcp/src/xnet.h          |  9 ++++++++-
+ prov/tcp/src/xnet_cq.c       | 16 ++++++++++++++++
+ prov/tcp/src/xnet_progress.c | 14 +++++++++++++-
+ prov/tcp/src/xnet_srx.c      |  2 ++
+ 4 files changed, 39 insertions(+), 2 deletions(-)
+
+diff --git a/prov/tcp/src/xnet.h b/prov/tcp/src/xnet.h
+index 3be48ebf6a2..a206cb0e1da 100644
+--- a/prov/tcp/src/xnet.h
++++ b/prov/tcp/src/xnet.h
+@@ -392,6 +392,10 @@ static inline void xnet_signal_progress(struct xnet_progress *progress)
+ #define XNET_CLAIM_RECV		BIT(10)
+ #define XNET_MULTI_RECV		FI_MULTI_RECV /* BIT(16) */
+ 
++struct xnet_mrecv {
++	size_t			ref_cnt;
++};
++
+ struct xnet_xfer_entry {
+ 	struct slist_entry	entry;
+ 	void			*user_buf;
+@@ -402,7 +406,10 @@ struct xnet_xfer_entry {
+ 	struct util_cntr	*cntr;
+ 	uint64_t		tag_seq_no;
+ 	uint64_t		tag;
+-	uint64_t		ignore;
++	union {
++		uint64_t		ignore;
++		struct xnet_mrecv	*mrecv;
++	};
+ 	fi_addr_t		src_addr;
+ 	uint64_t		cq_flags;
+ 	uint32_t		ctrl_flags;
+diff --git a/prov/tcp/src/xnet_cq.c b/prov/tcp/src/xnet_cq.c
+index 64a54dfb80c..11900c8b46e 100644
+--- a/prov/tcp/src/xnet_cq.c
++++ b/prov/tcp/src/xnet_cq.c
+@@ -152,6 +152,14 @@ void xnet_report_success(struct xnet_xfer_entry *xfer_entry)
+ 	if (flags & FI_RECV) {
+ 		len = xfer_entry->hdr.base_hdr.size -
+ 		      xfer_entry->hdr.base_hdr.hdr_size;
++		if (xfer_entry->ctrl_flags & XNET_MULTI_RECV &&
++		    xfer_entry->mrecv) {
++			xfer_entry->mrecv->ref_cnt--;
++			if (!xfer_entry->mrecv->ref_cnt) {
++				flags |= FI_MULTI_RECV;
++				free(xfer_entry->mrecv);
++			}
++		}
+ 		xnet_get_cq_info(xfer_entry, &flags, &data, &tag);
+ 	} else if (flags & FI_REMOTE_CQ_DATA) {
+ 		assert(flags & FI_REMOTE_WRITE);
+@@ -196,6 +204,14 @@ void xnet_report_error(struct xnet_xfer_entry *xfer_entry, int err)
+ 
+ 	err_entry.flags = xfer_entry->cq_flags & ~FI_COMPLETION;
+ 	if (err_entry.flags & FI_RECV) {
++		if (xfer_entry->ctrl_flags & XNET_MULTI_RECV &&
++		    xfer_entry->mrecv) {
++			xfer_entry->mrecv->ref_cnt--;
++			if (!xfer_entry->mrecv->ref_cnt) {
++				err_entry.flags |= FI_MULTI_RECV;
++				free(xfer_entry->mrecv);
++			}
++		}
+ 		xnet_get_cq_info(xfer_entry, &err_entry.flags, &err_entry.data,
+ 				 &err_entry.tag);
+ 	} else if (err_entry.flags & FI_REMOTE_CQ_DATA) {
+diff --git a/prov/tcp/src/xnet_progress.c b/prov/tcp/src/xnet_progress.c
+index b8e7ddf8b6f..88c6ef4972f 100644
+--- a/prov/tcp/src/xnet_progress.c
++++ b/prov/tcp/src/xnet_progress.c
+@@ -584,11 +584,22 @@ static int xnet_alter_mrecv(struct xnet_ep *ep, struct xnet_xfer_entry *xfer,
+ 	if (!recv_entry)
+ 		goto complete;
+ 
++	if (!xfer->mrecv) {
++		xfer->mrecv = calloc(1, sizeof(struct xnet_mrecv));
++		if (!xfer->mrecv) {
++			xfer->cq_flags |= FI_MULTI_RECV;
++			return FI_SUCCESS;
++		}
++		xfer->mrecv->ref_cnt = 1;
++	}
++
+ 	recv_entry->ctrl_flags = XNET_MULTI_RECV;
+ 	recv_entry->cq_flags = FI_MSG | FI_RECV;
+ 	recv_entry->cntr = xfer->cntr;
+ 	recv_entry->cq = xfer->cq;
+ 	recv_entry->context = xfer->context;
++	recv_entry->mrecv = xfer->mrecv;
++	recv_entry->mrecv->ref_cnt++;
+ 
+ 	recv_entry->iov_cnt = 1;
+ 	recv_entry->user_buf =  (char *) xfer->iov[0].iov_base + msg_len;
+@@ -599,7 +610,8 @@ static int xnet_alter_mrecv(struct xnet_ep *ep, struct xnet_xfer_entry *xfer,
+ 	return 0;
+ 
+ complete:
+-	xfer->cq_flags |= FI_MULTI_RECV;
++	if (!xfer->mrecv)
++		xfer->cq_flags |= FI_MULTI_RECV;
+ 	return ret;
+ }
+ 
+diff --git a/prov/tcp/src/xnet_srx.c b/prov/tcp/src/xnet_srx.c
+index ed30de692bb..66a6ceedef9 100644
+--- a/prov/tcp/src/xnet_srx.c
++++ b/prov/tcp/src/xnet_srx.c
+@@ -59,6 +59,7 @@ xnet_alloc_srx_xfer(struct xnet_srx *srx)
+ 	if (xfer) {
+ 		xfer->cntr = srx->cntr;
+ 		xfer->cq = srx->cq;
++		xfer->mrecv = NULL;
+ 	}
+ 
+ 	return xfer;
+@@ -131,6 +132,7 @@ xnet_srx_recv(struct fid_ep *ep_fid, void *buf, size_t len, void *desc,
+ 
+ 	srx = container_of(ep_fid, struct xnet_srx, rx_fid);
+ 
++
+ 	ofi_genlock_lock(xnet_srx2_progress(srx)->active_lock);
+ 	recv_entry = xnet_alloc_srx_xfer(srx);
+ 	if (!recv_entry) {

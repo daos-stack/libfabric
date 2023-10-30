@@ -28,6 +28,7 @@ Group:          System Environment/Libraries
 %endif
 URL:            https://github.com/ofiwg/libfabric
 Source0:        https://github.com/ofiwg/%{name}/releases/download/v%{dl_version}/%{name}-%{dl_version}.tar.bz2
+Patch0:         prov_tcp_multi_recv.patch
 
 %if %{__remake_config}
 BuildRequires:  automake
@@ -190,10 +191,11 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_mandir}/man7/*.7*
 
 %changelog
-* Tue Sep  5 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.19.0-1
+* Mon Oct 30 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.19.0-1
 - Update to 1.19.0
 - Drop prov/tcp patches that were merged in 1.19.0
 - Drop prov/opx patch that was merged in 1.19.0
+- Add prov/tcp multi-recv patch
 
 * Fri Jul 21 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.18.1-1
 - Update to 1.18.1
