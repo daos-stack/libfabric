@@ -1,13 +1,6 @@
 %define suse_libname libfabric1
 
 %global __remake_config 0
-%global _hardened_build 1
-# opx provider not supported on CentOS 7 builds
-%if 0%{?rhel} && 0%{?rhel} < 8
-%global __build_opx 0
-%else
-%global __build_opx 1
-%endif
 
 Name:           libfabric
 Version:        1.19.0
@@ -20,7 +13,7 @@ Release:        1%{?dist}
 
 Summary:        Open Fabric Interfaces
 License:        BSD or GPLv2
-%if 0%{?suse_version} >= 01315
+%if 0%{?suse_version}
 Group:          Development/Libraries/C and C++
 Requires:       %{suse_libname}%{?_isa} = %{version}-%{release}
 %else
@@ -39,21 +32,17 @@ BuildRequires:  gcc
 BuildRequires:  make
 BuildRequires:  libnl3-devel
 BuildRequires:  libibverbs-devel
-%if 0%{?rhel} >= 7
-BuildRequires:  librdmacm-devel
-BuildRequires:  numactl-devel
-%else
-%if 0%{?suse_version} >= 1315
+%if 0%{?suse_version}
 BuildRequires:  rdma-core-devel
 BuildRequires:  libnuma-devel
-%endif
+%else
+BuildRequires:  librdmacm-devel
+BuildRequires:  numactl-devel
 %endif
 BuildRequires:  fdupes
 BuildRequires:  valgrind-devel
 # required by OPX provider
-%if %{__build_opx}
 BuildRequires:  libuuid-devel
-%endif
 
 %description
 OpenFabrics Interfaces (OFI) is a framework focused on exporting fabric
@@ -67,7 +56,7 @@ exports the user-space API of OFI, and is typically the only software that
 applications deal with directly.  It works in conjunction with provider
 libraries, which are often integrated directly into libfabric.
 
-%if 0%{?suse_version} >= 01315
+%if 0%{?suse_version}
 %package -n %{suse_libname}
 Summary:        Shared library for libfabric
 Group:          System/Libraries
@@ -79,7 +68,7 @@ services, such as RDMA. This package contains the runtime library.
 
 %package        devel
 Summary:        Development files for %{name}
-%if 0%{?suse_version} >= 01315
+%if 0%{?suse_version}
 Group:          Development/Libraries/C and C++
 Requires:       %{suse_libname}%{?_isa} = %{version}-%{release}
 %else
@@ -91,7 +80,7 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 The %{name}-devel package contains libraries and header files for
 developing applications that use %{name}.
 
-%if (0%{?suse_version} > 0)
+%if 0%{?suse_version}
 %global __debug_package 1
 %global _debuginfo_subpackages 0
 %debug_package
@@ -104,7 +93,7 @@ developing applications that use %{name}.
 %if %{__remake_config}
 ./autogen.sh
 %endif
-%if (0%{?suse_version} > 0)
+%if 0%{?suse_version}
 export CFLAGS="%{optflags} -fPIC -pie"
 export CXXFLAGS="%{optflags} -fPIC -pie"
 %endif
@@ -118,11 +107,7 @@ export CXXFLAGS="%{optflags} -fPIC -pie"
             --enable-verbs            \
             --enable-rxm              \
             --enable-shm              \
-%if %{__build_opx}
             --enable-opx              \
-%else
-            --disable-opx             \
-%endif
             --disable-usnic           \
             --disable-efa             \
             --disable-dmabuf_peer_mem \
@@ -144,21 +129,18 @@ sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 %make_build
 
-
 %install
 %make_install
 find %{buildroot} -name '*.la' -exec rm -f {} ';'
 # remove warnings created by dummy manpages
 %fdupes %{buildroot}/%{_prefix}
 
-
-%if 0%{?suse_version} >= 01315
+%if 0%{?suse_version}
 %post -n %{suse_libname} -p /sbin/ldconfig
 %postun -n %{suse_libname} -p /sbin/ldconfig
 %else
 %ldconfig_scriptlets
 %endif
-
 
 %files
 %defattr(-,root,root,-)
@@ -167,12 +149,12 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_bindir}/fi_info
 %{_bindir}/fi_pingpong
 %{_bindir}/fi_strerror
-%if 0%{?rhel} >= 7
+%if 0%{?rhel}
 %{_libdir}/*.so.1*
 %endif
 %{_mandir}/man1/*.1*
 
-%if 0%{?suse_version} >= 01315
+%if 0%{?suse_version}
 %files -n %{suse_libname}
 %defattr(-,root,root)
 %{_libdir}/*.so.1*
@@ -196,6 +178,7 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 - Drop prov/tcp patches that were merged in 1.19.0
 - Drop prov/opx patch that was merged in 1.19.0
 - Add prov/tcp multi-recv patch
+- Drop support for CentOS7
 
 * Fri Jul 21 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.18.1-1
 - Update to 1.18.1
