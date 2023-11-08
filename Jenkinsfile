@@ -41,6 +41,6 @@
 //@Library(value="pipeline-lib@your_branch") _
 
 /* groovylint-disable-next-line CompileStatic */
-packageBuildingPipelineDAOSTest(['distros': ['el8', 'el9', 'centos7', 'leap15', 'ubuntu20.04'],
+packageBuildingPipelineDAOSTest(['distros': ['el8', 'el9', 'leap15', 'ubuntu20.04'],
                                  'make args': 'DISTRO_VERSION_EL8=8.5',
-                                 'test-tag': 'daosio'])
+                                 'test-tag': 'daosio DmgNetworkScanTest'])
