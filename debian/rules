@@ -12,6 +12,7 @@ configure_providers = \
 	--enable-rxm \
 	--enable-shm \
 	--enable-psm3 \
+	--without-cuda \
 	--disable-static \
 	--disable-opx \
 	--disable-usnic \
