@@ -4,7 +4,7 @@
 
 Name:           libfabric
 Version:        1.19.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 
 # dl_version is version with ~ removed
 %{lua:
@@ -108,6 +108,7 @@ export CXXFLAGS="%{optflags} -fPIC -pie"
             --enable-rxm              \
             --enable-shm              \
             --enable-opx              \
+            --enable-psm3             \
             --disable-usnic           \
             --disable-efa             \
             --disable-dmabuf_peer_mem \
@@ -121,7 +122,6 @@ export CXXFLAGS="%{optflags} -fPIC -pie"
             --disable-udp             \
             --disable-psm             \
             --disable-psm2            \
-            --disable-psm3            \
             --disable-gni             \
             --disable-bgq
 
@@ -173,6 +173,9 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_mandir}/man7/*.7*
 
 %changelog
+* Tue Nov 14 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.19.0-2
+- Enable psm3 provider
+
 * Mon Oct 30 2023 Jerome Soumagne <jerome.soumagne@intel.com> - 1.19.0-1
 - Update to 1.19.0
 - Drop prov/tcp patches that were merged in 1.19.0
