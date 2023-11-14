@@ -1,9 +1,3 @@
-libfabric (1.19.0-2) unstable; urgency=medium
-  [ Jerome Soumagne ]
-  * Enable psm3 provider
-
- -- Jerome Soumagne <jerome.soumagne@intel.com>  Tue, 14 Nov 2023 10:00:00 -0600
-
 libfabric (1.19.0-1) unstable; urgency=medium
   [ Jerome Soumagne ]
   * Update to 1.19.0

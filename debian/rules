@@ -11,8 +11,6 @@ configure_providers = \
 	--enable-verbs \
 	--enable-rxm \
 	--enable-shm \
-	--enable-psm3 \
-	--without-cuda \
 	--disable-static \
 	--disable-opx \
 	--disable-usnic \
@@ -28,6 +26,7 @@ configure_providers = \
 	--disable-udp \
 	--disable-psm \
 	--disable-psm2 \
+	--disable-psm3 \
 	--disable-gni \
 	--disable-bgq \
 	$(NULL)
