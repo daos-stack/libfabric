@@ -1,3 +1,10 @@
+libfabric (1.20.1-1) unstable; urgency=medium
+  [ Jerome Soumagne ]
+  * Update to 1.20.1
+  * Drop prov/verbs patch merged in 1.20.1
+
+ -- Jerome Soumagne <jerome.soumagne@intel.com>  Tue, 7 May 2024 10:00:00 -0600
+
 libfabric (1.19.1-1) unstable; urgency=medium
   [ Jerome Soumagne ]
   * Update to 1.19.1
