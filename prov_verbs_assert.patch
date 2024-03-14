@@ -1,0 +1,63 @@
+From d827c6484cc5bf67dfbe395890e258860c3f0979 Mon Sep 17 00:00:00 2001
+From: Sylvain Didelot <sdidelot@ddn.com>
+Date: Wed, 15 Nov 2023 13:20:39 +0000
+Subject: [PATCH] [v1.20.x] prov/verbs: Add missing lock to protect SRX
+
+When compiled with --enable-debug, the test fi_shared_ctx fails on
+the following assertion failure:
+fi_shared_ctx: prov/verbs/src/verbs_ofi.h:993: vrb_alloc_ctx: Assertion `ofi_genlock_held(progress->active_lock)' failed.
+
+And here is the associated stack:
+6  0x00007ffff7a39e96 in __GI___assert_fail (assertion=0x7ffff7f2ec28 "ofi_genlock_held(progress->active_lock)", file=0x7ffff7f2ec08 "prov/verbs/src/verbs_ofi.h", line=993, function=0x7ffff7f2f338 <__PRETTY_FUNCTION__.45> "vrb_alloc_ctx") at ./assert/assert.c:101
+7  0x00007ffff7e06b9b in vrb_alloc_ctx (progress=0x5555555ca1a0) at prov/verbs/src/verbs_ofi.h:993
+8  0x00007ffff7e0b9fe in vrb_post_srq (srx=0x5555555ca7c0, wr=0x7fffffffe120) at prov/verbs/src/verbs_ep.c:1603
+9  0x00007ffff7e0bd2d in vrb_srx_recv (ep_fid=0x5555555ca7c0, buf=0x0, len=1024, desc=0x0, src_addr=18446744073709551615, context=0x55555556b740 <rx_ctx>) at prov/verbs/src/verbs_ep.c:1649
+10 0x000055555555d720 in fi_recv (context=0x55555556b740 <rx_ctx>, src_addr=<optimized out>, desc=0x0, len=1024, buf=0x0, ep=0x5555555ca7c0) at /home/sdidelot/libfabric/include/rdma/fi_endpoint.h:297
+11 ft_post_rx_buf (ep=0x5555555ca7c0, size=1024, ctx=0x55555556b740 <rx_ctx>, op_buf=0x0, op_mr_desc=0x0, op_tag=0) at common/shared.c:2392
+12 0x000055555555d937 in ft_post_rx (ep=<optimized out>, size=<optimized out>, ctx=<optimized out>) at common/shared.c:2400
+13 0x00005555555576cf in server_connect () at functional/shared_ctx.c:502
+14 run () at functional/shared_ctx.c:547
+15 main (argc=<optimized out>, argv=<optimized out>) at functional/shared_ctx.c:629
+
+The problem is that vrb_post_srq() doesn't acquire progress->active_lock
+when vrb_alloc_ctx() is called, which may result in a race condition
+if multiple threads concurrently access the same SRX queue.
+
+Signed-off-by: Sylvain Didelot <sdidelot@ddn.com>
+(cherry picked from commit 81a4d6d5dee9d8f9442d372a4ff49c862b3518e6)
+---
+ prov/verbs/src/verbs_ep.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+ mode change 100644 => 100755 prov/verbs/src/verbs_ep.c
+
+diff --git a/prov/verbs/src/verbs_ep.c b/prov/verbs/src/verbs_ep.c
+old mode 100644
+new mode 100755
+index dd0ba3c0389..be59391424f
+--- a/prov/verbs/src/verbs_ep.c
++++ b/prov/verbs/src/verbs_ep.c
+@@ -1533,9 +1533,12 @@ ssize_t vrb_post_srq(struct vrb_srx *srx, struct ibv_recv_wr *wr)
+ 	struct ibv_recv_wr *bad_wr;
+ 	int ret;
+ 
++	ofi_genlock_lock(vrb_srx2_progress(srx)->active_lock);
+ 	ctx = vrb_alloc_ctx(vrb_srx2_progress(srx));
+-	if (!ctx)
+-		return -FI_EAGAIN;
++	if (!ctx) {
++		ret = -FI_EAGAIN;
++		goto unlock;
++	}
+ 
+ 	ctx->srx = srx;
+ 	ctx->user_ctx = (void *) (uintptr_t) wr->wr_id;
+@@ -1549,6 +1552,9 @@ ssize_t vrb_post_srq(struct vrb_srx *srx, struct ibv_recv_wr *wr)
+ 		vrb_free_ctx(vrb_srx2_progress(srx), ctx);
+ 		ret = FI_EAGAIN;
+ 	}
++
++unlock:
++	ofi_genlock_unlock(vrb_srx2_progress(srx)->active_lock);
+ 	return ret;
+ }
+ 
