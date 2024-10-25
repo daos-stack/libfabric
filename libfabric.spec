@@ -172,7 +172,7 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_mandir}/man7/*.7*
 
 %changelog
-* Thu Aug 08 2024 Jerome Soumagne <jerome.soumagne@intel.com> - 1.22.0-1
+* Fri Oct 25 2024 Jerome Soumagne <jerome.soumagne@intel.com> - 1.22.0-1
 - Update to 1.22.0
 - Drop prov/verbs patch merged upstream
 
