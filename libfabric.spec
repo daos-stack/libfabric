@@ -3,7 +3,7 @@
 %global __remake_config 0
 
 Name:           libfabric
-Version:        1.19.1
+Version:        1.22.0
 Release:        1%{?dist}
 
 # dl_version is version with ~ removed
@@ -21,8 +21,6 @@ Group:          System Environment/Libraries
 %endif
 URL:            https://github.com/ofiwg/libfabric
 Source0:        https://github.com/ofiwg/%{name}/releases/download/v%{dl_version}/%{name}-%{dl_version}.tar.bz2
-# https://github.com/ofiwg/libfabric/commit/d827c6484cc5bf67dfbe395890e258860c3f0979.patch
-Patch0:         prov_verbs_assert.patch
 
 %if %{__remake_config}
 BuildRequires:  automake
@@ -174,6 +172,10 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_mandir}/man7/*.7*
 
 %changelog
+* Fri Oct 25 2024 Jerome Soumagne <jerome.soumagne@intel.com> - 1.22.0-1
+- Update to 1.22.0
+- Drop prov/verbs patch merged upstream
+
 * Thu Mar 14 2024 Jerome Soumagne <jerome.soumagne@intel.com> - 1.19.1-1
 - Update to 1.19.1
 - Drop prov/tcp multi-recv patch merged upstream
