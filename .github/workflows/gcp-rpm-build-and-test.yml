@@ -64,10 +64,11 @@ jobs:
     # lastSuccessfulBuild link if it fails
     name: Create lastBuild and lastSuccessfulBuild symlinks
     runs-on: [self-hosted, light]
+    needs: [GCP-Setup]
+    if: needs.GCP-Setup.result == 'success'
     steps:
       - name: Create lastBuild and lastSuccessfulBuild symlinks
-        run: . ci/gha_functions.sh;
-               mkdir -p ${REPO_PATH};
+        run: mkdir -p ${REPO_PATH};
                rm -f ${REPO_PATH}last{,Successful}Build;
                ln -s ${{ github.run_number }} ${REPO_PATH}lastBuild;
                ln -s ${{ github.run_number }} ${REPO_PATH}lastSuccessfulBuild
