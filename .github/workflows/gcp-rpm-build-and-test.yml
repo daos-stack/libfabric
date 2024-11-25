@@ -18,7 +18,7 @@ env:
   GCS_BUCKET_MOUNT_PT: /tmp/gcp_artifacts
   ARTIFACTORY_URL: https://artifactory.dc.hpdd.intel.com/
   JENKINS_URL: https://us-central1-yum.pkg.dev/projects/192572342707/rpm
-  REPO_PATH: /tmp/job_repos/daos-stack/job/daos/job/PR-${{ github.event.pull_request.number }}/
+  REPO_PATH: /tmp/job_repos/daos-stack/job/libfabric/job/PR-${{ github.event.pull_request.number }}/
   REPOSITORY_URL:
   ARTIFACTS_URL: file:///tmp/gcp_artifacts/job_repos/
   REPO_FILE_URL: file:///tmp/gcp_artifacts/repo_files/
@@ -48,6 +48,7 @@ jobs:
     steps:
       - name: Set up GCSFUSE
         run: |
+             fusermount -u ${GCS_BUCKET_MOUNT_PT} || true
              mkdir -p "${GCS_BUCKET_MOUNT_PT}"
              gcsfuse --implicit-dirs "${GCS_BUCKET}" "${GCS_BUCKET_MOUNT_PT}"
 
