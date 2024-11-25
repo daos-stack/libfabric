@@ -171,14 +171,14 @@ jobs:
       - name: Build RPM Docker image
         id: build-rpm-docker-image
         continue-on-error: true
-        run: docker build --file utils/rpms/packaging/Dockerfile.mockbuild
+        run: docker build --file packaging/Dockerfile.mockbuild
                           --build-arg CACHEBUST=$(date +%s%3N)
                           --build-arg CB0=$(date +%V)
                           --build-arg REPO_FILE_URL=$REPO_FILE_URL
                           --build-arg UID=$(id -u)
                           --build-arg FVERSION=${{ env.FVERSION }}
                           --tag mock-build
-                          utils/rpms
+                          packaging
       - name: Build RPM
         id: build-rpm
         continue-on-error: true
@@ -199,7 +199,7 @@ jobs:
                         -e REPO_FILE_URL="$REPO_FILE_URL"
                         -e JENKINS_URL="$JENKINS_URL"
                         -e TARGET="$TARGET"
-                        mock-build ci/rpm/build.sh
+                        mock-build make -f Makefile_packaging.mk
         # yamllint enable rule:line-length
       - name: Build RPM failure log
         id: build-rpm-fail-log
