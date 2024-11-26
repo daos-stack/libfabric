@@ -9,11 +9,12 @@ env:
   EL9_BUILD_VERSION: 9
   EL9_VERSION: 9
   LEAP15_VERSION: 15.5
+  # temporarily disable EL9 builds
+  CP_SKIP_BUILD_EL9_RPM: true
   CP_SKIP_BUILD_LEAP15_RPM: true
   CP_SKIP_FUNC_TEST_EL8: true
   CP_SKIP_FUNC_TEST_EL9: true
   CP_SKIP_FUNC_TEST_LEAP15: true
-  # looks to me like this can't be blank, but doesn't actually get used?
   GCS_BUCKET: github_ci_artifacts
   GCS_BUCKET_MOUNT_PT: /tmp/gcp_artifacts
   ARTIFACTORY_URL:
@@ -64,7 +65,7 @@ jobs:
     # instead we assume success at the beginning and then let any axis that fails remove the
     # lastSuccessfulBuild link if it fails
     name: Create lastBuild and lastSuccessfulBuild symlinks
-    runs-on: [self-hosted, light]
+    runs-on: [self-hosted, gcp]
     needs: [GCP-Setup]
     if: needs.GCP-Setup.result == 'success'
     steps:
@@ -105,7 +106,7 @@ jobs:
     name: Build RPM
     permissions:
       statuses: write
-    runs-on: [self-hosted, docker]
+    runs-on: [self-hosted, gcp]
     needs: [Create-symlinks, Calc-rpm-build-matrix]
     if: needs.Create-symlinks.result == 'success' &&
         ((!cancelled()) || success() || failure())
@@ -178,7 +179,7 @@ jobs:
                           --build-arg UID=$(id -u)
                           --build-arg FVERSION=${{ env.FVERSION }}
                           --tag mock-build
-                          packaging
+                          .
       - name: Build RPM
         id: build-rpm
         continue-on-error: true
