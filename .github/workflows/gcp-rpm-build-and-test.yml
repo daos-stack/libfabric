@@ -4,25 +4,24 @@ env:
   # TODO: we really need to define a list of supported versions (ideally it's no more than 2)
   #       build is done on the lowest version and test on the highest with a "sanity test"
   #       stage done on all versions in the list ecept the highest
-  EL8_BUILD_VERSION: 8.6
-  EL8_VERSION: 8.8
+  EL8_BUILD_VERSION: 8
+  EL8_VERSION: 8
   EL9_BUILD_VERSION: 9
   EL9_VERSION: 9
   LEAP15_VERSION: 15.5
   # temporarily disable EL9 builds
   CP_SKIP_BUILD_EL9_RPM: true
   CP_SKIP_BUILD_LEAP15_RPM: true
-  CP_SKIP_FUNC_TEST_EL8: true
-  CP_SKIP_FUNC_TEST_EL9: true
-  CP_SKIP_FUNC_TEST_LEAP15: true
   GCS_BUCKET: github_ci_artifacts
   GCS_BUCKET_MOUNT_PT: /tmp/gcp_artifacts
   ARTIFACTORY_URL:
-  JENKINS_URL: https://us-central1-yum.pkg.dev/projects/192572342707/rpm
-  REPO_PATH: /tmp/job_repos/daos-stack/job/libfabric/job/PR-${{ github.event.pull_request.number }}/
+  JENKINS_URL: file:///tmp/gcp_artifacts/
+  REPO_PATH: file:///tmp/gcp_artifacts/job_repos/daos-stack/job/libfabric/job/PR-${{ github.event.pull_request.number }}/
   REPOSITORY_URL:
   ARTIFACTS_URL: file:///tmp/gcp_artifacts/job_repos/
   REPO_FILE_URL:
+  PROJECT_ID: daos-github-ci
+  WIP_PROVIDER: projects/192572342707/locations/global/workloadIdentityPools/github/providers/daos
 
 on:
   workflow_dispatch:
@@ -43,16 +42,6 @@ defaults:
 permissions: {}
 
 jobs:
-  GCP-Setup:
-    name: GCP setup
-    runs-on: [self-hosted, gcp]
-    steps:
-      - name: Set up GCSFUSE
-        run: |
-             fusermount -u ${GCS_BUCKET_MOUNT_PT} || true
-             mkdir -p "${GCS_BUCKET_MOUNT_PT}"
-             gcsfuse --implicit-dirs "${GCS_BUCKET}" "${GCS_BUCKET_MOUNT_PT}"
-
   Create-symlinks:
     # you might think this is an odd place to do this and it should be done as a result of the
     # build and/or testing stages and ideally you'd be right.
@@ -66,9 +55,18 @@ jobs:
     # lastSuccessfulBuild link if it fails
     name: Create lastBuild and lastSuccessfulBuild symlinks
     runs-on: [self-hosted, gcp]
-    needs: [GCP-Setup]
-    if: needs.GCP-Setup.result == 'success'
     steps:
+      - name: Authenticate to GCP
+        id: gcp-authentication
+        uses: 'google-github-actions/auth@v2'
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          workload_identity_provider: ${{ env.WIP_PROVIDER }}
+      - name: Set up GCSFUSE
+        run: |
+              fusermount -u ${GCS_BUCKET_MOUNT_PT} || true
+              mkdir -p "${GCS_BUCKET_MOUNT_PT}"
+              gcsfuse --implicit-dirs "${GCS_BUCKET}" "${GCS_BUCKET_MOUNT_PT}"
       - name: Create lastBuild and lastSuccessfulBuild symlinks
         run: mkdir -p ${REPO_PATH};
                rm -f ${REPO_PATH}last{,Successful}Build;
@@ -200,7 +198,7 @@ jobs:
                         -e REPO_FILE_URL="$REPO_FILE_URL"
                         -e JENKINS_URL="$JENKINS_URL"
                         -e TARGET="$TARGET"
-                        mock-build make -f Makefile_packaging.mk
+                        mock-build make chrootbuild
         # yamllint enable rule:line-length
       - name: Build RPM failure log
         id: build-rpm-fail-log
@@ -229,6 +227,17 @@ jobs:
              dnf --disablerepo=\* --repofrompath
                  testrepo,file://${REPO_PATH}${{ github.run_number }}/artifact/artifacts/$TARGET
                  repoquery -a
+      - name: Authenticate to GCP
+        id: gcp-authentication
+        uses: 'google-github-actions/auth@v2'
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          workload_identity_provider: ${{ env.WIP_PROVIDER }}
+      - name: Set up GCSFUSE
+        run: |
+              fusermount -u ${GCS_BUCKET_MOUNT_PT} || true
+              mkdir -p "${GCS_BUCKET_MOUNT_PT}"
+              gcsfuse --implicit-dirs "${GCS_BUCKET}" "${GCS_BUCKET_MOUNT_PT}"
       - name: Remove lastSuccessfulBuild link and exit failure
         if: steps.test-repo.outcome != 'success'
         run: rm -f ${REPO_PATH}lastSuccessfulBuild;
@@ -236,7 +245,7 @@ jobs:
       - name: Publish RPMs
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.DISTRO_NAME }} ${{ env.DISTRO_VERSION }} RPM repository
+          name: ${{ env.DISTRO_NAME }} ${{ env.DISTRO_VERSION }} GCP RPM repository
           path: ${{ env.REPO_PATH}}${{ github.run_number }}/artifact/artifacts/${{ env.TARGET }}
       - name: Update commit status
         uses: ouzi-dev/commit-status-updater@v2
