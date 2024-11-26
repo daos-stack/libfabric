@@ -16,12 +16,12 @@ env:
   # looks to me like this can't be blank, but doesn't actually get used?
   GCS_BUCKET: github_ci_artifacts
   GCS_BUCKET_MOUNT_PT: /tmp/gcp_artifacts
-  ARTIFACTORY_URL: https://artifactory.dc.hpdd.intel.com/
+  ARTIFACTORY_URL:
   JENKINS_URL: https://us-central1-yum.pkg.dev/projects/192572342707/rpm
   REPO_PATH: /tmp/job_repos/daos-stack/job/libfabric/job/PR-${{ github.event.pull_request.number }}/
   REPOSITORY_URL:
   ARTIFACTS_URL: file:///tmp/gcp_artifacts/job_repos/
-  REPO_FILE_URL: file:///tmp/gcp_artifacts/repo_files/
+  REPO_FILE_URL:
 
 on:
   workflow_dispatch:
@@ -76,7 +76,7 @@ jobs:
 
   Calc-rpm-build-matrix:
     name: Calculate RPM Build Matrix
-    runs-on: [self-hosted, wolf]
+    runs-on: [self-hosted, gcp]
     needs: [Create-symlinks]
     outputs:
       matrix: ${{ steps.matrix.outputs.text }}
