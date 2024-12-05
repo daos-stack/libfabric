@@ -9,14 +9,11 @@ env:
   EL9_BUILD_VERSION: 9
   EL9_VERSION: 9
   LEAP15_VERSION: 15.5
-  # temporarily disable EL9 builds
-  CP_SKIP_BUILD_EL9_RPM: true
-  CP_SKIP_BUILD_LEAP15_RPM: true
   GCS_BUCKET: github_ci_artifacts
   GCS_BUCKET_MOUNT_PT: /tmp/gcp_artifacts
   ARTIFACTORY_URL:
   JENKINS_URL: file:///tmp/gcp_artifacts/
-  REPO_PATH: file:///tmp/gcp_artifacts/job_repos/daos-stack/job/libfabric/job/PR-${{ github.event.pull_request.number }}/
+  REPO_PATH: /tmp/gcp_artifacts/job_repos/daos-stack/job/libfabric/job/PR-${{ github.event.pull_request.number }}/
   REPOSITORY_URL:
   ARTIFACTS_URL: file:///tmp/gcp_artifacts/job_repos/
   REPO_FILE_URL:
@@ -54,19 +51,32 @@ jobs:
     # instead we assume success at the beginning and then let any axis that fails remove the
     # lastSuccessfulBuild link if it fails
     name: Create lastBuild and lastSuccessfulBuild symlinks
+    permissions:
+      statuses: write
+      contents: read
+      id-token: write
     runs-on: [self-hosted, gcp]
     steps:
+      # we are required to checkout the code to have auth save the token we need for GCSFUSE
+      # per https://github.com/google-github-actions/auth#inputs-miscellaneous
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: Authenticate to GCP
         id: gcp-authentication
         uses: 'google-github-actions/auth@v2'
         with:
           project_id: ${{ env.PROJECT_ID }}
           workload_identity_provider: ${{ env.WIP_PROVIDER }}
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v2"
       - name: Set up GCSFUSE
         run: |
-              fusermount -u ${GCS_BUCKET_MOUNT_PT} || true
+              sudo fusermount -u ${GCS_BUCKET_MOUNT_PT} && sudo rm -fr /tmp/gcp_artifacts || true
               mkdir -p "${GCS_BUCKET_MOUNT_PT}"
-              gcsfuse --implicit-dirs "${GCS_BUCKET}" "${GCS_BUCKET_MOUNT_PT}"
+              #weird hack needed to prevent gcsfuse from authentication failure
+              sudo -u $(whoami) gcsfuse --implicit-dirs "${GCS_BUCKET}" "${GCS_BUCKET_MOUNT_PT}"
       - name: Create lastBuild and lastSuccessfulBuild symlinks
         run: mkdir -p ${REPO_PATH};
                rm -f ${REPO_PATH}last{,Successful}Build;
@@ -104,6 +114,8 @@ jobs:
     name: Build RPM
     permissions:
       statuses: write
+      contents: read
+      id-token: write
     runs-on: [self-hosted, gcp]
     needs: [Create-symlinks, Calc-rpm-build-matrix]
     if: needs.Create-symlinks.result == 'success' &&
@@ -160,9 +172,10 @@ jobs:
             echo "DISTRO_NAME=$DISTRO_NAME" >> $GITHUB_ENV
             echo "DISTRO_VERSION=$DISTRO_VERSION" >> $GITHUB_ENV
             echo "BUILD_CHROOT=/var/lib/mock/$CHROOT_NAME-${{ github.run_id }}/" >> $GITHUB_ENV
-            echo "STAGE_NAME=Build RPM on $DISTRO_NAME $DISTRO_VERSION" >> $GITHUB_ENV
+            echo "STAGE_NAME=Build GCP RPM on $DISTRO_NAME $DISTRO_VERSION" >> $GITHUB_ENV
             echo "FVERSION=$FVERSION" >> $GITHUB_ENV
             echo "COMMIT_STATUS_DISTRO_VERSION=$COMMIT_STATUS_DISTRO_VERSION" >> $GITHUB_ENV
+            echo "REPO_BUILD_PATH=${REPO_PATH}${{ github.run_number }}/artifact/artifacts/$TARGET" >> $GITHUB_ENV
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -218,14 +231,17 @@ jobs:
         id: create-repo
         if: steps.build-rpm.outcome == 'success'
         continue-on-error: true
-        run: CHROOT_NAME=$CHROOT_NAME ci/rpm/create_repo.sh
+        run: |
+          mkdir -p "${REPO_BUILD_PATH}"
+          cp -a mock_result/*.rpm "${REPO_BUILD_PATH}"
+          cd "${REPO_BUILD_PATH}"
+          createrepo .
       - name: Test repo
         id: test-repo
         if: steps.create-repo.outcome == 'success'
         continue-on-error: true
-        run: . ci/gha_functions.sh;
-             dnf --disablerepo=\* --repofrompath
-                 testrepo,file://${REPO_PATH}${{ github.run_number }}/artifact/artifacts/$TARGET
+        run: dnf --disablerepo=\* --repofrompath
+                 testrepo,"${REPO_BUILD_PATH}"
                  repoquery -a
       - name: Authenticate to GCP
         id: gcp-authentication
@@ -233,11 +249,13 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
           workload_identity_provider: ${{ env.WIP_PROVIDER }}
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v2"
       - name: Set up GCSFUSE
         run: |
-              fusermount -u ${GCS_BUCKET_MOUNT_PT} || true
+              sudo fusermount -u ${GCS_BUCKET_MOUNT_PT} && sudo rm -fr /tmp/gcp_artifacts || true
               mkdir -p "${GCS_BUCKET_MOUNT_PT}"
-              gcsfuse --implicit-dirs "${GCS_BUCKET}" "${GCS_BUCKET_MOUNT_PT}"
+              sudo -u ext_mlawsonca_google_com gcsfuse --implicit-dirs "${GCS_BUCKET}" "${GCS_BUCKET_MOUNT_PT}"
       - name: Remove lastSuccessfulBuild link and exit failure
         if: steps.test-repo.outcome != 'success'
         run: rm -f ${REPO_PATH}lastSuccessfulBuild;
