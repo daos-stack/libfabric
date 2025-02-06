@@ -4,7 +4,7 @@
 
 Name:           libfabric
 Version:        1.22.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 
 # dl_version is version with ~ removed
 %{lua:
@@ -40,6 +40,7 @@ BuildRequires:  numactl-devel
 %endif
 BuildRequires:  fdupes
 BuildRequires:  valgrind-devel
+BuildRequires:  libpsm2-devel
 # required by OPX provider
 BuildRequires:  libuuid-devel
 
@@ -106,6 +107,7 @@ export CXXFLAGS="%{optflags} -fPIC -pie"
             --enable-verbs            \
             --enable-rxm              \
             --enable-shm              \
+            --enable-psm2             \
             --enable-opx              \
             --disable-usnic           \
             --disable-efa             \
@@ -119,7 +121,6 @@ export CXXFLAGS="%{optflags} -fPIC -pie"
             --disable-mrail           \
             --disable-udp             \
             --disable-psm             \
-            --disable-psm2            \
             --disable-psm3            \
             --disable-gni             \
             --disable-bgq
@@ -172,6 +173,9 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_mandir}/man7/*.7*
 
 %changelog
+* Thu Feb 06 2025 Jerome Soumagne <jerome.soumagne@intel.com> - 1.22.0-2
+- Re-enable psm2 provider for other applications depending on libfabric
+
 * Fri Oct 25 2024 Jerome Soumagne <jerome.soumagne@intel.com> - 1.22.0-1
 - Update to 1.22.0
 - Drop prov/verbs patch merged upstream
