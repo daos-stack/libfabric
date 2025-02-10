@@ -1,0 +1,273 @@
+name: RPM Build and Test
+
+env:
+  # TODO: we really need to define a list of supported versions (ideally it's no more than 2)
+  #       build is done on the lowest version and test on the highest with a "sanity test"
+  #       stage done on all versions in the list ecept the highest
+  EL8_BUILD_VERSION: 8
+  EL8_VERSION: 8
+  EL9_BUILD_VERSION: 9
+  EL9_VERSION: 9
+  LEAP15_VERSION: 15.5
+  GCS_BUCKET: github_ci_artifacts
+  GCS_BUCKET_MOUNT_PT: /tmp/gcp_artifacts
+  ARTIFACTORY_URL:
+  JENKINS_URL: file:///tmp/gcp_artifacts/
+  REPO_PATH: /tmp/gcp_artifacts/job_repos/daos-stack/job/libfabric/job/PR-${{ github.event.pull_request.number }}/
+  REPOSITORY_URL:
+  ARTIFACTS_URL: file:///tmp/gcp_artifacts/job_repos/
+  REPO_FILE_URL:
+  PROJECT_ID: daos-github-ci
+  WIP_PROVIDER: projects/192572342707/locations/global/workloadIdentityPools/github/providers/daos
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr-repos:
+        description: 'Any PR-repos that you want included in this build'
+        required: false
+  pull_request:
+
+concurrency:
+  group: rpm-build-and-test-${{ github.head_ref  || github.run_id }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash --noprofile --norc -ueo pipefail {0}
+
+permissions: {}
+
+jobs:
+  Create-symlinks:
+    # you might think this is an odd place to do this and it should be done as a result of the
+    # build and/or testing stages and ideally you'd be right.
+    # the problem with that is that there is no way to get the success/fail result of individual
+    # axes of matrix jobs so there is no way to query them at the end and see their composite
+    # results.
+    # instead, the final result of the Build-RPM job, for example is a last-one-complete wins.
+    # so for example, if the el9 axis fails quickly and then the el8 axis succeeds afterward the
+    # resulting job state is success.
+    # instead we assume success at the beginning and then let any axis that fails remove the
+    # lastSuccessfulBuild link if it fails
+    name: Create lastBuild and lastSuccessfulBuild symlinks
+    permissions:
+      statuses: write
+      contents: read
+      id-token: write
+    runs-on: [self-hosted, gcp]
+    steps:
+      # we are required to checkout the code to have auth save the token we need for GCSFUSE
+      # per https://github.com/google-github-actions/auth#inputs-miscellaneous
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Authenticate to GCP
+        id: gcp-authentication
+        uses: 'google-github-actions/auth@v2'
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          workload_identity_provider: ${{ env.WIP_PROVIDER }}
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v2"
+      - name: Set up GCSFUSE
+        run: |
+              sudo fusermount -u ${GCS_BUCKET_MOUNT_PT} && sudo rm -fr /tmp/gcp_artifacts || true
+              mkdir -p "${GCS_BUCKET_MOUNT_PT}"
+              #weird hack needed to prevent gcsfuse from authentication failure
+              sudo -u $(whoami) gcsfuse --implicit-dirs "${GCS_BUCKET}" "${GCS_BUCKET_MOUNT_PT}"
+      - name: Create lastBuild and lastSuccessfulBuild symlinks
+        run: mkdir -p ${REPO_PATH};
+               rm -f ${REPO_PATH}last{,Successful}Build;
+               ln -s ${{ github.run_number }} ${REPO_PATH}lastBuild;
+               ln -s ${{ github.run_number }} ${REPO_PATH}lastSuccessfulBuild
+
+  Calc-rpm-build-matrix:
+    name: Calculate RPM Build Matrix
+    runs-on: [self-hosted, gcp]
+    needs: [Create-symlinks]
+    outputs:
+      matrix: ${{ steps.matrix.outputs.text }}
+    steps:
+      - name: Calculate RPM Build Matrix
+        id: matrix
+        run: |  # do not use the non-| format for this script
+             l=()
+             trap 'echo "text=[$(IFS=","; echo "${l[*]}")]" >> $GITHUB_OUTPUT' EXIT
+             if ${CP_SKIP_BUILD:-false}; then
+                 exit 0
+             fi
+             if ! ${CP_SKIP_BUILD_EL8_RPM:-false}; then
+                 l+=('"el8"')
+             fi
+             if ! ${CP_SKIP_BUILD_EL9_RPM:-false}; then
+                 l+=('"el9"')
+             fi
+             if ${{ github.event_name == 'push' }} ||
+                (${{ github.event_name == 'pull_request' }} &&
+                ! ${CP_SKIP_BUILD_LEAP15_RPM:-false}); then
+                 l+=('"leap15"')
+             fi
+
+  Build-RPM:
+    name: Build RPM
+    permissions:
+      statuses: write
+      contents: read
+      id-token: write
+    runs-on: [self-hosted, gcp]
+    needs: [Create-symlinks, Calc-rpm-build-matrix]
+    if: needs.Create-symlinks.result == 'success' &&
+        ((!cancelled()) || success() || failure())
+    strategy:
+      matrix:
+        distro: ${{ fromJSON(needs.Calc-rpm-build-matrix.outputs.matrix) }}
+      fail-fast: false
+    env:
+      DAOS_EMAIL: brian.murrell@intel.com
+      DAOS_FULLNAME: daos-stack
+      DISTRO: ${{ matrix.distro }}
+      DISTRO_REPOS: disabled
+      DOCKER_BUILDKIT: 0
+      MOCK_OPTIONS: --uniqueext=${{ github.run_id }}
+      PR_NUM: ${{ github.event.pull_request.number }}
+      # TODO -- this should be on stable, backedup storage, not /scratch
+      # yamllint disable-line rule:line-length
+      RUN_ID: ${{ github.run_id }}
+      TARGET: ${{ matrix.distro }}
+      # keep VS Code's GHA linting happy
+      STAGE_NAME:
+      DISTRO_NAME:
+      DISTRO_VERSION:
+      CP_LEAP15_VERSION:
+      COMMIT_STATUS_DISTRO_VERSION:
+      FVERSION:
+    steps:
+      - name: Set variables
+        run: |
+            FVERSION="38"
+            case ${{ matrix.distro }} in
+                'el8')
+                    CHROOT_NAME="rocky+epel-8-x86_64"
+                    DISTRO_NAME="EL"
+                    DISTRO_VERSION="${{ env.EL8_BUILD_VERSION }}"
+                    COMMIT_STATUS_DISTRO_VERSION="8"
+                    ;;
+                'el9')
+                    CHROOT_NAME="rocky+epel-9-x86_64"
+                    DISTRO_NAME="EL"
+                    DISTRO_VERSION="${{ env.EL9_BUILD_VERSION }}"
+                    ;;
+                'leap15')
+                    CHROOT_NAME="opensuse-leap-${{ env.CP_LEAP15_VERSION &&
+                                                   env.CP_LEAP15_VERSION ||
+                                                   env.LEAP15_VERSION }}-x86_64"
+                    DISTRO_NAME="Leap"
+                    DISTRO_VERSION="${{ env.CP_LEAP15_VERSION &&
+                                        env.CP_LEAP15_VERSION || env.LEAP15_VERSION }}"
+                    ;;
+            esac
+            echo "CHROOT_NAME=$CHROOT_NAME" >> $GITHUB_ENV
+            echo "DISTRO_NAME=$DISTRO_NAME" >> $GITHUB_ENV
+            echo "DISTRO_VERSION=$DISTRO_VERSION" >> $GITHUB_ENV
+            echo "BUILD_CHROOT=/var/lib/mock/$CHROOT_NAME-${{ github.run_id }}/" >> $GITHUB_ENV
+            echo "STAGE_NAME=Build GCP RPM on $DISTRO_NAME $DISTRO_VERSION" >> $GITHUB_ENV
+            echo "FVERSION=$FVERSION" >> $GITHUB_ENV
+            echo "COMMIT_STATUS_DISTRO_VERSION=$COMMIT_STATUS_DISTRO_VERSION" >> $GITHUB_ENV
+            echo "REPO_BUILD_PATH=${REPO_PATH}${{ github.run_number }}/artifact/artifacts/$TARGET" >> $GITHUB_ENV
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Build RPM Docker image
+        id: build-rpm-docker-image
+        continue-on-error: true
+        run: docker build --file packaging/Dockerfile.mockbuild
+                          --build-arg CACHEBUST=$(date +%s%3N)
+                          --build-arg CB0=$(date +%V)
+                          --build-arg REPO_FILE_URL=$REPO_FILE_URL
+                          --build-arg UID=$(id -u)
+                          --build-arg FVERSION=${{ env.FVERSION }}
+                          --tag mock-build
+                          .
+      - name: Build RPM
+        id: build-rpm
+        continue-on-error: true
+        # yamllint disable rule:line-length
+        run: rm -rf mock_result;
+             mkdir -p mock_result;
+             docker run --name mock-build-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.distro }}
+                        --user build
+                        -v "$PWD":"$PWD" -w "$PWD"
+                        -v "$PWD"/mock_result:/var/lib/mock/$CHROOT_NAME/result
+                        --privileged=true
+                        -e DAOS_FULLNAME="$DAOS_FULLNAME"
+                        -e DAOS_EMAIL="$DAOS_EMAIL"
+                        -e DISTRO_VERSION="$DISTRO_VERSION"
+                        -e STAGE_NAME="$STAGE_NAME"
+                        -e CHROOT_NAME="$CHROOT_NAME"
+                        -e ARTIFACTORY_URL="$ARTIFACTORY_URL"
+                        -e REPO_FILE_URL="$REPO_FILE_URL"
+                        -e JENKINS_URL="$JENKINS_URL"
+                        -e TARGET="$TARGET"
+                        mock-build make chrootbuild
+        # yamllint enable rule:line-length
+      - name: Build RPM failure log
+        id: build-rpm-fail-log
+        continue-on-error: true
+        if: steps.build-rpm.outcome != 'success'
+        run: cat mock_result/root.log;
+             cat mock_result/build.log
+      - name: Save RPM build logs
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.STAGE_NAME }} logs
+          path: |
+            mock_result/root.log
+            mock_result/build.log
+      - name: Create repo
+        id: create-repo
+        if: steps.build-rpm.outcome == 'success'
+        continue-on-error: true
+        run: |
+          mkdir -p "${REPO_BUILD_PATH}"
+          cp -a mock_result/*.rpm "${REPO_BUILD_PATH}"
+          cd "${REPO_BUILD_PATH}"
+          createrepo .
+      - name: Test repo
+        id: test-repo
+        if: steps.create-repo.outcome == 'success'
+        continue-on-error: true
+        run: dnf --disablerepo=\* --repofrompath
+                 testrepo,"${REPO_BUILD_PATH}"
+                 repoquery -a
+      - name: Authenticate to GCP
+        id: gcp-authentication
+        uses: 'google-github-actions/auth@v2'
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          workload_identity_provider: ${{ env.WIP_PROVIDER }}
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v2"
+      - name: Set up GCSFUSE
+        run: |
+              sudo fusermount -u ${GCS_BUCKET_MOUNT_PT} && sudo rm -fr /tmp/gcp_artifacts || true
+              mkdir -p "${GCS_BUCKET_MOUNT_PT}"
+              sudo -u ext_mlawsonca_google_com gcsfuse --implicit-dirs "${GCS_BUCKET}" "${GCS_BUCKET_MOUNT_PT}"
+      - name: Remove lastSuccessfulBuild link and exit failure
+        if: steps.test-repo.outcome != 'success'
+        run: rm -f ${REPO_PATH}lastSuccessfulBuild;
+             exit 1
+      - name: Publish RPMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.DISTRO_NAME }} ${{ env.DISTRO_VERSION }} GCP RPM repository
+          path: ${{ env.REPO_PATH}}${{ github.run_number }}/artifact/artifacts/${{ env.TARGET }}
+      - name: Update commit status
+        uses: ouzi-dev/commit-status-updater@v2
+        with:
+          # yamllint disable-line rule:line-length
+          name: 'build/Build RPM on ${{ env.DISTRO_NAME }} ${{ env.COMMIT_STATUS_DISTRO_VERSION && env.COMMIT_STATUS_DISTRO_VERSION || env.DISTRO_VERSION }}'
+          status: "${{ job.status }}"
