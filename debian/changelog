@@ -1,3 +1,10 @@
+libfabric (1.22.0-3) unstable; urgency=medium
+  [ Jinshan Xiong]
+  * Introduce feature negotiations to RDM
+  * Add firewall support to tcp provider
+
+ -- Jerome Soumagne <jerome.soumagne@intel.com>  Thu, 06 Feb 2025 11:00:00 -0600
+
 libfabric (1.22.0-2) unstable; urgency=medium
   [ Jerome Soumagne ]
   * Re-enable psm2 provider for other applications depending on libfabric

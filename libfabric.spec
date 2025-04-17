@@ -4,7 +4,7 @@
 
 Name:           libfabric
 Version:        1.22.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 
 # dl_version is version with ~ removed
 %{lua:
@@ -21,6 +21,7 @@ Group:          System Environment/Libraries
 %endif
 URL:            https://github.com/ofiwg/libfabric
 Source0:        https://github.com/ofiwg/%{name}/releases/download/v%{dl_version}/%{name}-%{dl_version}.tar.bz2
+Patch0:         ofi_firewall.patch
 
 %if %{__remake_config}
 BuildRequires:  automake
@@ -173,6 +174,10 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_mandir}/man7/*.7*
 
 %changelog
+* Wed Apr 16 2025 Jinshan Xiong <jinshanx@google.com> - 1.22.0-3
+- Introduce feature negotiations to RDM
+- Add firewall support to tcp provider
+
 * Thu Feb 06 2025 Jerome Soumagne <jerome.soumagne@intel.com> - 1.22.0-2
 - Re-enable psm2 provider for other applications depending on libfabric
 
